@@ -1,0 +1,16 @@
+[
+{
+  "modid": "render360",
+  "name": "Render360",
+  "description": "Renders the game with a 360 degree view",
+  "version": "2.2.3",
+  "mcversion": "1.11",
+  "url": "",
+  "updateUrl": "",
+  "authorList": ["18107"],
+  "credits": "",
+  "logoFile": "",
+  "screenshots": [],
+  "dependencies": []
+}
+]
