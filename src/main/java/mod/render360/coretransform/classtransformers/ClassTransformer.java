@@ -1,7 +1,12 @@
 package mod.render360.coretransform.classtransformers;
 
+import org.apache.commons.lang3.ArrayUtils;
 import org.objectweb.asm.tree.ClassNode;
 import org.objectweb.asm.tree.MethodNode;
+
+import mod.render360.coretransform.classtransformers.particle.BarrierTransformer;
+import mod.render360.coretransform.classtransformers.particle.ParticleExplosionLargeTransformer;
+import mod.render360.coretransform.classtransformers.particle.ParticleTransformer;
 
 /**
  * Holds all of the class transformers.
@@ -13,7 +18,9 @@ public abstract class ClassTransformer {
 	
 	static {
 		//Put all of the class transformers here
-		transformers = new ClassTransformer[] {new MinecraftTransformer(), new GuiScreenTransformer(), new LoadingScreenRendererTransformer(), new EntityRendererTransformer(), new GuiOptionsTransformer()};
+		ClassTransformer[] classTransformers = new ClassTransformer[] {new MinecraftTransformer(), new GuiScreenTransformer(), new LoadingScreenRendererTransformer(), new EntityRendererTransformer(), new ParticleTransformer(), new GuiOptionsTransformer()};
+		
+		transformers = ArrayUtils.addAll(classTransformers, ParticleTransformer.getParticleTransformers());
 	}
 	
 	//Template for a method transformer
