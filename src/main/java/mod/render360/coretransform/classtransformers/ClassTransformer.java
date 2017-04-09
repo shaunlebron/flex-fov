@@ -13,7 +13,7 @@ public abstract class ClassTransformer {
 	
 	static {
 		//Put all of the class transformers here
-		transformers = new ClassTransformer[] {new EntityRendererTransformer(), new MinecraftTransformer(), new GuiOptionsTransformer()};
+		transformers = new ClassTransformer[] {new MinecraftTransformer(), new GuiScreenTransformer(), new LoadingScreenRendererTransformer(), new EntityRendererTransformer(), new GuiOptionsTransformer()};
 	}
 	
 	//Template for a method transformer

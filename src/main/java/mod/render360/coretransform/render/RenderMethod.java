@@ -1,7 +1,9 @@
 package mod.render360.coretransform.render;
 
+import java.io.IOException;
 import java.util.List;
 
+import org.lwjgl.opengl.Display;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL13;
 import org.lwjgl.opengl.GL15;
@@ -13,9 +15,13 @@ import mod.render360.coretransform.gui.Slider;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiPageButtonList.GuiResponder;
+import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.renderer.EntityRenderer;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.OpenGlHelper;
+import net.minecraft.client.renderer.Tessellator;
+import net.minecraft.client.renderer.VertexBuffer;
+import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.client.shader.Framebuffer;
 import net.minecraft.entity.Entity;
 
@@ -77,6 +83,110 @@ public abstract class RenderMethod {
 	}
 	
 	public abstract String getFragmentShader();
+	
+	/**
+	 * Called from {@link net.minecraft.client.gui.GuiScreen#drawWorldBackground(int) drawWorldBackground()}
+	 * @param guiScreen
+	 */
+	public void renderLoadingScreen(GuiScreen guiScreen) {
+		renderLoadingScreen(guiScreen, Minecraft.getMinecraft().getFramebuffer());
+	}
+	
+	public void renderLoadingScreen(GuiScreen guiScreen, Framebuffer framebufferIn) {
+		if (guiScreen == null) {
+			guiScreen = new GuiScreen(){};
+			guiScreen.width = framebufferIn.framebufferTextureWidth;
+			guiScreen.height = framebufferIn.framebufferTextureHeight;
+		}
+		Minecraft mc = Minecraft.getMinecraft();
+		Framebuffer framebuffer = new Framebuffer((int)(Display.getHeight()*getQuality()), (int)(Display.getHeight()*getQuality()), true);
+		
+		framebuffer.bindFramebuffer(false);
+		OpenGlHelper.glFramebufferTexture2D(OpenGlHelper.GL_FRAMEBUFFER, OpenGlHelper.GL_COLOR_ATTACHMENT0, GL11.GL_TEXTURE_2D, framebuffer.framebufferTexture, 0);
+		GlStateManager.bindTexture(0);
+		
+		// guiScreen.drawBackground(0);
+		GlStateManager.disableLighting();
+        GlStateManager.disableFog();
+        Tessellator tessellator = Tessellator.getInstance();
+        VertexBuffer vertexbuffer = tessellator.getBuffer();
+        mc.getTextureManager().bindTexture(guiScreen.OPTIONS_BACKGROUND);
+        vertexbuffer.begin(7, DefaultVertexFormats.POSITION_TEX_COLOR);
+        vertexbuffer.pos(0.0D, (double)guiScreen.height, 0.0D).tex(0.0D, (double)((float)guiScreen.height / 32.0F)).color(64, 64, 64, 255).endVertex();
+        vertexbuffer.pos((double)guiScreen.width, (double)guiScreen.height, 0.0D).tex((double)((float)guiScreen.width / 32.0F), (double)((float)guiScreen.height / 32.0F)).color(64, 64, 64, 255).endVertex();
+        vertexbuffer.pos((double)guiScreen.width, 0.0D, 0.0D).tex((double)((float)guiScreen.width / 32.0F), (double)0).color(64, 64, 64, 255).endVertex();
+        vertexbuffer.pos(0.0D, 0.0D, 0.0D).tex(0.0D, 0).color(64, 64, 64, 255).endVertex();
+        tessellator.draw();
+        //
+		
+		framebufferIn.bindFramebuffer(false);
+		GlStateManager.viewport(0, 0, framebufferIn.framebufferTextureWidth, framebufferIn.framebufferTextureHeight);
+		
+		Shader shader = new Shader();
+		try {
+			shader.createShaderProgram(this);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		
+		GL20.glUseProgram(shader.getShaderProgram());
+
+		//Setup view
+		GL11.glMatrixMode(GL11.GL_PROJECTION);
+		GL11.glPushMatrix();
+		GL11.glLoadIdentity();
+		GL11.glOrtho(-1, 1, -1, 1, -1, 1);
+		GL11.glMatrixMode(GL11.GL_MODELVIEW);
+		GL11.glPushMatrix();
+		GL11.glLoadIdentity();
+		
+		int texFrontUniform = GL20.glGetUniformLocation(shader.getShaderProgram(), "texFront");
+		GL20.glUniform1i(texFrontUniform, 0);
+		int texBackUniform = GL20.glGetUniformLocation(shader.getShaderProgram(), "texBack");
+		GL20.glUniform1i(texBackUniform, 1);
+		int texLeftUniform = GL20.glGetUniformLocation(shader.getShaderProgram(), "texLeft");
+		GL20.glUniform1i(texLeftUniform, 2);
+		int texRightUniform = GL20.glGetUniformLocation(shader.getShaderProgram(), "texRight");
+		GL20.glUniform1i(texRightUniform, 3);
+		int texTopUniform = GL20.glGetUniformLocation(shader.getShaderProgram(), "texTop");
+		GL20.glUniform1i(texTopUniform, 4);
+		int texBottomUniform = GL20.glGetUniformLocation(shader.getShaderProgram(), "texBottom");
+		GL20.glUniform1i(texBottomUniform, 5);
+		int fovUniform = GL20.glGetUniformLocation(shader.getShaderProgram(), "fovx");
+		GL20.glUniform1f(fovUniform, getFOV());
+		int backgroundUniform = GL20.glGetUniformLocation(shader.getShaderProgram(), "backgroundColor");
+		GL20.glUniform4f(backgroundUniform, 0, 0, 0, 1);
+		
+		GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, shader.getVbo());
+		GL20.glEnableVertexAttribArray(0);
+		GL20.glVertexAttribPointer(0, 2, GL11.GL_BYTE, false, 0, 0L);
+		for (int i = 0; i < 6; i++) {
+			GL13.glActiveTexture(GL13.GL_TEXTURE0+i);
+			GL11.glBindTexture(GL11.GL_TEXTURE_2D, framebuffer.framebufferTexture);
+		}
+		GL11.glDrawArrays(GL11.GL_TRIANGLES, 0, 6);
+		GL11.glBindTexture(GL11.GL_TEXTURE_2D, 0);
+		GL20.glDisableVertexAttribArray(0);
+		GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, 0);
+		
+		//Reset view
+		GL11.glMatrixMode(GL11.GL_PROJECTION);
+		GL11.glPopMatrix();
+		GL11.glMatrixMode(GL11.GL_MODELVIEW);
+		GL11.glPopMatrix();
+
+		//unbind textures
+		for (int i = 5; i >= 0; i--) {
+			GL13.glActiveTexture(GL13.GL_TEXTURE0+i);
+			GL11.glBindTexture(GL11.GL_TEXTURE_2D, 0);
+		}
+		
+		//Unbind shader
+		GL20.glUseProgram(0);
+		shader.deleteShaderProgram();
+		framebuffer.deleteFramebuffer();
+		framebufferIn.bindFramebuffer(false);
+	}
 	
 	/**
 	 * Render the world.
@@ -323,6 +433,10 @@ public abstract class RenderMethod {
 	
 	public boolean getResizeGui() {
 		return resizeGui;
+	}
+	
+	public boolean replaceLoadingScreen() {
+		return false;
 	}
 	
 	public float[] getBackgroundColor() {

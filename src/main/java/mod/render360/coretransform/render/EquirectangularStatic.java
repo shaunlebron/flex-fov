@@ -56,6 +56,11 @@ public class EquirectangularStatic extends RenderMethod {
 	}
 	
 	@Override
+	public boolean replaceLoadingScreen() {
+		return true;
+	}
+	
+	@Override
 	public void addButtonsToGui(List<GuiButton> buttonList, int width, int height) {
 		super.addButtonsToGui(buttonList, width, height);
 		buttonList.add(new GuiButton(18106, width / 2 - 155, height / 6 + 48, 150, 20, "Draw Circle: " + (drawCircle ? "ON" : "OFF")));

@@ -54,4 +54,9 @@ public class Cubic extends RenderMethod {
 			return null;
 		}
 	}
+	
+	@Override
+	public boolean replaceLoadingScreen() {
+		return true;
+	}
 }

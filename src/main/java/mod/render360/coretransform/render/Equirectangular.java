@@ -23,6 +23,11 @@ public class Equirectangular extends RenderMethod {
 	}
 	
 	@Override
+	public boolean replaceLoadingScreen() {
+		return true;
+	}
+	
+	@Override
 	public void addButtonsToGui(List<GuiButton> buttonList, int width, int height) {
 		super.addButtonsToGui(buttonList, width, height);
 		buttonList.add(new Slider(new Responder(), 18101, width / 2 - 180, height / 6 + 48, 360, 20, "FOV", 0f, 360f, fov, 1f, null));
