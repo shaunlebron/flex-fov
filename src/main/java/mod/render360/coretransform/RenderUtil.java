@@ -61,11 +61,7 @@ public class RenderUtil {
 	private static void createShader() {
 		if (shader == null) {
 			shader = new Shader();
-			try {
-				shader.createShaderProgram(renderMethod);
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
+			shader.createShaderProgram(renderMethod);
 		} else {
 			CLTLog.info("Attemped to re-create existing shader");
 		}
@@ -102,10 +98,10 @@ public class RenderUtil {
 							framebuffer.framebufferTextureWidth, framebuffer.framebufferTextureHeight,
 							0, GL11.GL_RGBA, GL11.GL_UNSIGNED_BYTE, null);
 					GlStateManager.bindTexture(framebufferTextures[i]);
-		            GlStateManager.glTexParameteri(3553, 10241, 9728);
-		            GlStateManager.glTexParameteri(3553, 10240, 9728);
-		            GlStateManager.glTexParameteri(3553, 10242, 10496);
-		            GlStateManager.glTexParameteri(3553, 10243, 10496);
+		            GlStateManager.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MIN_FILTER, GL11.GL_NEAREST);
+		            GlStateManager.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MAG_FILTER, GL11.GL_NEAREST);
+		            GlStateManager.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_WRAP_S, GL11.GL_CLAMP);
+		            GlStateManager.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_WRAP_T, GL11.GL_CLAMP);
 				}
 				GlStateManager.bindTexture(0);
 			} else {
@@ -161,10 +157,10 @@ public class RenderUtil {
 						framebuffer.framebufferTextureWidth, framebuffer.framebufferTextureHeight,
 						0, GL11.GL_RGBA, GL11.GL_UNSIGNED_BYTE, null);
 				GlStateManager.bindTexture(framebufferTextures[i]);
-	            GlStateManager.glTexParameteri(3553, 10241, 9728);
-	            GlStateManager.glTexParameteri(3553, 10240, 9728);
-	            GlStateManager.glTexParameteri(3553, 10242, 10496);
-	            GlStateManager.glTexParameteri(3553, 10243, 10496);
+				GlStateManager.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MIN_FILTER, GL11.GL_NEAREST);
+	            GlStateManager.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MAG_FILTER, GL11.GL_NEAREST);
+	            GlStateManager.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_WRAP_S, GL11.GL_CLAMP);
+	            GlStateManager.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_WRAP_T, GL11.GL_CLAMP);
 			}
 			GlStateManager.bindTexture(0);
 		}

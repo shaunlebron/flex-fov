@@ -93,6 +93,7 @@ public abstract class RenderMethod {
 	}
 	
 	public void renderLoadingScreen(GuiScreen guiScreen, Framebuffer framebufferIn) {
+		//Prevents null pointer exception when moving between dimensions
 		if (guiScreen == null) {
 			guiScreen = new GuiScreen(){};
 			guiScreen.width = framebufferIn.framebufferTextureWidth;
@@ -105,7 +106,7 @@ public abstract class RenderMethod {
 		OpenGlHelper.glFramebufferTexture2D(OpenGlHelper.GL_FRAMEBUFFER, OpenGlHelper.GL_COLOR_ATTACHMENT0, GL11.GL_TEXTURE_2D, framebuffer.framebufferTexture, 0);
 		GlStateManager.bindTexture(0);
 		
-		// guiScreen.drawBackground(0);
+		//replacement for guiScreen.drawBackground(0);
 		GlStateManager.disableLighting();
         GlStateManager.disableFog();
         Tessellator tessellator = Tessellator.getInstance();
@@ -123,11 +124,7 @@ public abstract class RenderMethod {
 		GlStateManager.viewport(0, 0, framebufferIn.framebufferTextureWidth, framebufferIn.framebufferTextureHeight);
 		
 		Shader shader = new Shader();
-		try {
-			shader.createShaderProgram(this);
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+		shader.createShaderProgram(this);
 		
 		GL20.glUseProgram(shader.getShaderProgram());
 
@@ -139,6 +136,16 @@ public abstract class RenderMethod {
 		GL11.glMatrixMode(GL11.GL_MODELVIEW);
 		GL11.glPushMatrix();
 		GL11.glLoadIdentity();
+		
+		//Anti-aliasing
+		int pixelOffsetUniform = GL20.glGetUniformLocation(shader.getShaderProgram(), "pixelOffset[0]");
+		GL20.glUniform2f(pixelOffsetUniform, -0.25f/mc.displayWidth, -0.25f/mc.displayHeight);
+		pixelOffsetUniform = GL20.glGetUniformLocation(shader.getShaderProgram(), "pixelOffset[1]");
+		GL20.glUniform2f(pixelOffsetUniform, 0.25f/mc.displayWidth, -0.25f/mc.displayHeight);
+		pixelOffsetUniform = GL20.glGetUniformLocation(shader.getShaderProgram(), "pixelOffset[2]");
+		GL20.glUniform2f(pixelOffsetUniform, -0.25f/mc.displayWidth, 0.25f/mc.displayHeight);
+		pixelOffsetUniform = GL20.glGetUniformLocation(shader.getShaderProgram(), "pixelOffset[3]");
+		GL20.glUniform2f(pixelOffsetUniform, 0.25f/mc.displayWidth, 0.25f/mc.displayHeight);
 		
 		int texFrontUniform = GL20.glGetUniformLocation(shader.getShaderProgram(), "texFront");
 		GL20.glUniform1i(texFrontUniform, 0);
@@ -333,6 +340,16 @@ public abstract class RenderMethod {
 		GL11.glMatrixMode(GL11.GL_MODELVIEW);
 		GL11.glPushMatrix();
 		GL11.glLoadIdentity();
+		
+		//Anti-aliasing
+		int pixelOffsetUniform = GL20.glGetUniformLocation(shader.getShaderProgram(), "pixelOffset[0]");
+		GL20.glUniform2f(pixelOffsetUniform, -0.25f/mc.displayWidth, -0.25f/mc.displayHeight);
+		pixelOffsetUniform = GL20.glGetUniformLocation(shader.getShaderProgram(), "pixelOffset[1]");
+		GL20.glUniform2f(pixelOffsetUniform, 0.25f/mc.displayWidth, -0.25f/mc.displayHeight);
+		pixelOffsetUniform = GL20.glGetUniformLocation(shader.getShaderProgram(), "pixelOffset[2]");
+		GL20.glUniform2f(pixelOffsetUniform, -0.25f/mc.displayWidth, 0.25f/mc.displayHeight);
+		pixelOffsetUniform = GL20.glGetUniformLocation(shader.getShaderProgram(), "pixelOffset[3]");
+		GL20.glUniform2f(pixelOffsetUniform, 0.25f/mc.displayWidth, 0.25f/mc.displayHeight);
 
 		int texFrontUniform = GL20.glGetUniformLocation(shader.getShaderProgram(), "texFront");
 		GL20.glUniform1i(texFrontUniform, 0);
@@ -387,13 +404,13 @@ public abstract class RenderMethod {
 	}
 	
 	public void addButtonsToGui(List<GuiButton> buttonList, int width, int height) {
-		buttonList.add(new GuiButton(18105, width / 2 - 155, height / 6 + 24, 150, 20, "Resize Gui: " + (resizeGui ? "ON" : "OFF")));
-		buttonList.add(new Slider(new Responder(), 18103, width / 2 + 5, height / 6 + 24, 150, 20, "Quality", 0.1f, 10f, quality, 0.1f, null));
+		buttonList.add(new GuiButton(18101, width / 2 - 155, height / 6 + 48, 150, 20, "Resize Gui: " + (resizeGui ? "ON" : "OFF")));
+		buttonList.add(new Slider(new Responder(), 18102, width / 2 + 5, height / 6 + 48, 150, 20, "Quality", 0.1f, 5f, quality, 0.1f, null));
 	}
 	
 	public void onButtonPress(GuiButton button) {
 		//Resize Gui
-		if (button.id == 18105) {
+		if (button.id == 18101) {
 			resizeGui = !resizeGui;
 			button.displayString = "Resize Gui: " + (resizeGui ? "ON" : "OFF");
 		}
@@ -452,7 +469,7 @@ public abstract class RenderMethod {
 		@Override
 		public void setEntryValue(int id, float value) {
 			//Quality
-			if (id == 18103) {
+			if (id == 18102) {
 				if (quality != value) {
 					quality = value;
 					RenderUtil.forceReload();
