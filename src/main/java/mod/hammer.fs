@@ -59,7 +59,7 @@ void main(void) {
 		float latitude = asin(sqrt(2)*z*y);
 		
 		if (x*x + y*y > 1) {
-			colorN[loop] = backgroundColor;
+			color = backgroundColor;
 			return;
 		}
 		

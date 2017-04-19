@@ -18,6 +18,7 @@ import org.objectweb.asm.tree.VarInsnNode;
 import mod.render360.coretransform.CLTLog;
 import mod.render360.coretransform.CoreLoader;
 import mod.render360.coretransform.RenderUtil;
+import mod.render360.coretransform.render.RenderMethod;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.renderer.GlStateManager;
@@ -26,10 +27,6 @@ import net.minecraft.client.renderer.culling.ICamera;
 import net.minecraft.entity.Entity;
 
 public class EntityRendererTransformer extends ClassTransformer {
-	
-	protected EntityRendererTransformer() {
-		//Prevents this class from accidentally being created twice
-	}
 	
 	@Override
 	public String getObfuscatedClassName() {return "bqc";}
@@ -307,12 +304,10 @@ public class EntityRendererTransformer extends ClassTransformer {
 						//assume no other coremods are installed
 						
 						//Change from GlStateManager.viewport(0, 0, this.mc.displayWidth, this.mc.displayHeight);
-						//to GlStateManager.viewport(RenderUtil.partialXPos, RenderUtil.partialYPos, RenderUtil.partialWidth, RenderUtil.partialHeight);
+						//to GlStateManager.viewport(0, 0, RenderUtil.partialWidth, RenderUtil.partialHeight);
 						for (int i = 0; i < 8; i++) {
 							method.instructions.remove(instruction.getNext()); //remove 0, 0, this.mc.displayWidth, this.mc.displayHeight
 						}
-						//toInsert.add(new FieldInsnNode(GETSTATIC, Type.getInternalName(RenderUtil.class), "partialScreenXPos", "I"));
-						//toInsert.add(new FieldInsnNode(GETSTATIC, Type.getInternalName(RenderUtil.class), "partialScreenYPos", "I"));
 						toInsert.add(new InsnNode(ICONST_0));
 						toInsert.add(new InsnNode(ICONST_0));
 						toInsert.add(new FieldInsnNode(GETSTATIC, Type.getInternalName(RenderUtil.class), "partialWidth", "I"));
@@ -361,6 +356,51 @@ public class EntityRendererTransformer extends ClassTransformer {
 			}
 		};
 		
+		//Fix sunset color
+		MethodTransformer updateFogColorTransformer = new MethodTransformer() {
+			public String getMethodName() {return CoreLoader.isObfuscated ? "h" : "updateFogColor";}
+			public String getDescName() {return "(F)V";}
+			
+			@Override
+			public void transform(ClassNode classNode, MethodNode method, boolean obfuscated) {
+				CLTLog.info("Found method: " + method.name + " " + method.desc);
+				for (AbstractInsnNode instruction : method.instructions.toArray()) {
+					
+					if (instruction.getOpcode() == D2F &&
+							instruction.getPrevious().getOpcode() == INVOKEVIRTUAL &&
+							instruction.getNext().getOpcode() == FSTORE) {
+						CLTLog.info("found D2F in method " + getMethodName());
+						
+						//after float f5 = (float)entity.getLook(partialTicks).dotProduct(vec3d2);
+						for (int i = 0; i < 3; i++) {
+							instruction = instruction.getNext();
+						}
+						
+						InsnList toInsert = new InsnList();
+						LabelNode label = new LabelNode();
+						
+						//if (RenderUtil.renderMethod.getName() != "Standard") {
+							//f5 = 1;
+						//}
+						toInsert.add(new FieldInsnNode(GETSTATIC, Type.getInternalName(RenderUtil.class),
+								"renderMethod", "L" + Type.getInternalName(RenderMethod.class) + ";"));
+						toInsert.add(new MethodInsnNode(INVOKEVIRTUAL, Type.getInternalName(RenderMethod.class),
+								"getName", "()L" + Type.getInternalName(String.class) + ";", false));
+						toInsert.add(new LdcInsnNode("Standard"));
+						toInsert.add(new JumpInsnNode(IF_ACMPEQ, label));
+						
+						toInsert.add(new InsnNode(FCONST_1));
+						toInsert.add(new VarInsnNode(FSTORE, 13)); //f5
+						toInsert.add(label);
+						
+						method.instructions.insertBefore(instruction, toInsert);
+						
+						break;
+					}
+				}
+			}
+		};
+		
 		MethodTransformer drawNameplateTransformer = new MethodTransformer() {
 			public String getMethodName() {return CoreLoader.isObfuscated ? "a" : "drawNameplate";}
 			public String getDescName() {
@@ -396,7 +436,7 @@ public class EntityRendererTransformer extends ClassTransformer {
 			}
 		};
 		
-		return new MethodTransformer[] {transformGetFOVModifier, transformOrientCamera, transformSetupCameraTransform, transformUpdateCameraAndRender, transformRenderWorld, transformRenderWorldPass, drawNameplateTransformer};
+		return new MethodTransformer[] {transformGetFOVModifier, transformOrientCamera, transformSetupCameraTransform, transformUpdateCameraAndRender, transformRenderWorld, transformRenderWorldPass, updateFogColorTransformer, drawNameplateTransformer};
 	}
 
 }

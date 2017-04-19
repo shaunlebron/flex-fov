@@ -44,7 +44,6 @@ public abstract class RenderMethod {
 	
 	private float rotateX;
 	private float rotateY;
-	public static float testZ;
 	
 	static {
 		//Put all of the render methods here
