@@ -28,28 +28,35 @@ import net.minecraft.entity.Entity;
 public abstract class RenderMethod {
 
 	private final String vertexShader = "#version 130//\n /* The position of the vertex as two-dimensional vector */ in vec2 vertex; /* Write interpolated texture coordinate to fragment shader */ out vec2 texcoord; void main(void) { gl_Position = vec4(vertex, 0.0, 1.0); /* * Compute texture coordinate by simply * interval-mapping from [-1..+1] to [0..1] */ texcoord = vertex * 0.5 + vec2(0.5, 0.5); } ";
-	
+
 	/**
 	 * Contains all render methods
 	 */
 	private static final RenderMethod[] renderMethods;
-	
+
 	protected static float quality = 1;
 	protected static boolean resizeGui = false;
-	
+
 	private float yaw; //TODO remove
 	private float pitch;
 	private float prevYaw;
 	private float prevPitch;
-	
+
 	private float rotateX;
 	private float rotateY;
-	
+
 	static {
 		//Put all of the render methods here
-		renderMethods = new RenderMethod[] {new Standard(), new Cubic(), new Hammer(), new Equirectangular(), new EquirectangularStatic()};
+		renderMethods = new RenderMethod[] {
+			new Standard(),
+			new Cubic(),
+			new Hammer(),
+			new Equirectangular(),
+			new EquirectangularStatic(),
+			new Panini(),
+		};
 	}
-	
+
 	/**
 	 * Cycles through all of the render methods
 	 * @param index the current index
@@ -62,7 +69,7 @@ public abstract class RenderMethod {
 			return index + 1;
 		}
 	}
-	
+
 	/**
 	 * Returns a render method from the given index
 	 * @param index
@@ -71,18 +78,18 @@ public abstract class RenderMethod {
 	public static RenderMethod getRenderMethod(int index) {
 		return renderMethods[index];
 	}
-	
+
 	/**
 	 * @return the name to be displayed on the menu button
 	 */
 	public abstract String getName();
-	
+
 	public String getVertexShader() {
 		return vertexShader;
 	}
-	
+
 	public abstract String getFragmentShader();
-	
+
 	/**
 	 * Called from {@link net.minecraft.client.gui.GuiScreen#drawWorldBackground(int) drawWorldBackground()}
 	 * @param guiScreen
@@ -90,7 +97,7 @@ public abstract class RenderMethod {
 	public void renderLoadingScreen(GuiScreen guiScreen) {
 		renderLoadingScreen(guiScreen, Minecraft.getMinecraft().getFramebuffer());
 	}
-	
+
 	public void renderLoadingScreen(GuiScreen guiScreen, Framebuffer framebufferIn) {
 		//Prevents null pointer exception when moving between dimensions
 		if (guiScreen == null) {
@@ -100,11 +107,11 @@ public abstract class RenderMethod {
 		}
 		Minecraft mc = Minecraft.getMinecraft();
 		Framebuffer framebuffer = new Framebuffer((int)(Display.getHeight()*getQuality()), (int)(Display.getHeight()*getQuality()), true);
-		
+
 		framebuffer.bindFramebuffer(false);
 		OpenGlHelper.glFramebufferTexture2D(OpenGlHelper.GL_FRAMEBUFFER, OpenGlHelper.GL_COLOR_ATTACHMENT0, GL11.GL_TEXTURE_2D, framebuffer.framebufferTexture, 0);
 		GlStateManager.bindTexture(0);
-		
+
 		//replacement for guiScreen.drawBackground(0);
 		GlStateManager.disableLighting();
         GlStateManager.disableFog();
@@ -118,13 +125,13 @@ public abstract class RenderMethod {
         vertexbuffer.pos(0.0D, 0.0D, 0.0D).tex(0.0D, 0).color(64, 64, 64, 255).endVertex();
         tessellator.draw();
         //
-		
+
 		framebufferIn.bindFramebuffer(false);
 		GlStateManager.viewport(0, 0, framebufferIn.framebufferTextureWidth, framebufferIn.framebufferTextureHeight);
-		
+
 		Shader shader = new Shader();
 		shader.createShaderProgram(this);
-		
+
 		GL20.glUseProgram(shader.getShaderProgram());
 
 		//Setup view
@@ -135,7 +142,7 @@ public abstract class RenderMethod {
 		GL11.glMatrixMode(GL11.GL_MODELVIEW);
 		GL11.glPushMatrix();
 		GL11.glLoadIdentity();
-		
+
 		//Anti-aliasing
 		int pixelOffsetUniform = GL20.glGetUniformLocation(shader.getShaderProgram(), "pixelOffset[0]");
 		GL20.glUniform2f(pixelOffsetUniform, -0.25f/mc.displayWidth, -0.25f/mc.displayHeight);
@@ -145,7 +152,7 @@ public abstract class RenderMethod {
 		GL20.glUniform2f(pixelOffsetUniform, -0.25f/mc.displayWidth, 0.25f/mc.displayHeight);
 		pixelOffsetUniform = GL20.glGetUniformLocation(shader.getShaderProgram(), "pixelOffset[3]");
 		GL20.glUniform2f(pixelOffsetUniform, 0.25f/mc.displayWidth, 0.25f/mc.displayHeight);
-		
+
 		int texFrontUniform = GL20.glGetUniformLocation(shader.getShaderProgram(), "texFront");
 		GL20.glUniform1i(texFrontUniform, 0);
 		int texBackUniform = GL20.glGetUniformLocation(shader.getShaderProgram(), "texBack");
@@ -162,7 +169,7 @@ public abstract class RenderMethod {
 		GL20.glUniform1f(fovUniform, getFOV());
 		int backgroundUniform = GL20.glGetUniformLocation(shader.getShaderProgram(), "backgroundColor");
 		GL20.glUniform4f(backgroundUniform, 0, 0, 0, 1);
-		
+
 		GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, shader.getVbo());
 		GL20.glEnableVertexAttribArray(0);
 		GL20.glVertexAttribPointer(0, 2, GL11.GL_BYTE, false, 0, 0L);
@@ -174,7 +181,7 @@ public abstract class RenderMethod {
 		GL11.glBindTexture(GL11.GL_TEXTURE_2D, 0);
 		GL20.glDisableVertexAttribArray(0);
 		GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, 0);
-		
+
 		//Reset view
 		GL11.glMatrixMode(GL11.GL_PROJECTION);
 		GL11.glPopMatrix();
@@ -186,14 +193,14 @@ public abstract class RenderMethod {
 			GL13.glActiveTexture(GL13.GL_TEXTURE0+i);
 			GL11.glBindTexture(GL11.GL_TEXTURE_2D, 0);
 		}
-		
+
 		//Unbind shader
 		GL20.glUseProgram(0);
 		shader.deleteShaderProgram();
 		framebuffer.deleteFramebuffer();
 		framebufferIn.bindFramebuffer(false);
 	}
-	
+
 	/**
 	 * Render the world.
 	 * Called between {@link net.minecraft.client.renderer.EntityRenderer#renderWorld(float, long) renderWorld}
@@ -219,10 +226,10 @@ public abstract class RenderMethod {
 		//set them to the secondary framebuffer dimensions
 		mc.displayWidth = (int)(height*sizeIncrease);
 		mc.displayHeight = (int)(height*sizeIncrease); //Must be square
-		
+
 		RenderUtil.partialWidth = mc.displayWidth; //TODO is this even needed?
 		RenderUtil.partialHeight = mc.displayHeight; //TODO remove
-		
+
 		RenderUtil.render360 = true;
 
 		renderFront(er, mc, partialTicks, finishTimeNano, player, framebufferTextures[0], yaw, pitch, prevYaw, prevPitch);
@@ -235,22 +242,22 @@ public abstract class RenderMethod {
 				renderBack(er, mc, partialTicks, finishTimeNano, player, framebufferTextures[1], yaw, pitch, prevYaw, prevPitch);
 			}
 		}
-		
+
 		//reset the players state
 		player.rotationYaw = yaw;
 		player.rotationPitch = pitch;
 		player.prevRotationYaw = prevYaw;
 		player.prevRotationPitch = prevPitch;
-		
+
 		//reset displayWidth and displayHeight to the primary framebuffer dimensions
 		mc.displayWidth = width;
 		mc.displayHeight = height;
-		
+
 		//reset viewport to full screen
 		GlStateManager.viewport(0, 0, width, height);
 		//bind primary framebuffer
 		mc.getFramebuffer().bindFramebuffer(false);
-		
+
 		if (!getResizeGui() || mc.gameSettings.hideGUI) {
 			GL20.glUseProgram(shader.getShaderProgram());
 			int cursorUniform = GL20.glGetUniformLocation(shader.getShaderProgram(), "drawCursor");
@@ -258,7 +265,7 @@ public abstract class RenderMethod {
 			runShader(er, mc, framebuffer, shader, framebufferTextures);
 		}
 	}
-	
+
 	protected void renderFront(EntityRenderer er, Minecraft mc, float partialTicks, long finishTimeNano,
 			Entity player, int framebufferTexture, float yaw, float pitch, float prevYaw, float prevPitch) {
 		OpenGlHelper.glFramebufferTexture2D(OpenGlHelper.GL_FRAMEBUFFER, OpenGlHelper.GL_COLOR_ATTACHMENT0, GL11.GL_TEXTURE_2D, framebufferTexture, 0);
@@ -266,7 +273,7 @@ public abstract class RenderMethod {
 		//rotate the player and render
 		er.renderWorldPass(2, partialTicks, finishTimeNano);
 	}
-	
+
 	protected void renderLeft(EntityRenderer er, Minecraft mc, float partialTicks, long finishTimeNano,
 			Entity player, int framebufferTexture, float yaw, float pitch, float prevYaw, float prevPitch) {
 		OpenGlHelper.glFramebufferTexture2D(OpenGlHelper.GL_FRAMEBUFFER, OpenGlHelper.GL_COLOR_ATTACHMENT0, GL11.GL_TEXTURE_2D, framebufferTexture, 0);
@@ -279,7 +286,7 @@ public abstract class RenderMethod {
 		er.renderWorldPass(2, partialTicks, finishTimeNano);
 		RenderUtil.rotation = 0;
 	}
-	
+
 	protected void renderRight(EntityRenderer er, Minecraft mc, float partialTicks, long finishTimeNano,
 			Entity player, int framebufferTexture, float yaw, float pitch, float prevYaw, float prevPitch) {
 		OpenGlHelper.glFramebufferTexture2D(OpenGlHelper.GL_FRAMEBUFFER, OpenGlHelper.GL_COLOR_ATTACHMENT0, GL11.GL_TEXTURE_2D, framebufferTexture, 0);
@@ -292,7 +299,7 @@ public abstract class RenderMethod {
 		er.renderWorldPass(2, partialTicks, finishTimeNano);
 		RenderUtil.rotation = 0;
 	}
-	
+
 	protected void renderTop(EntityRenderer er, Minecraft mc, float partialTicks, long finishTimeNano,
 			Entity player, int framebufferTexture, float yaw, float pitch, float prevYaw, float prevPitch) {
 		OpenGlHelper.glFramebufferTexture2D(OpenGlHelper.GL_FRAMEBUFFER, OpenGlHelper.GL_COLOR_ATTACHMENT0, GL11.GL_TEXTURE_2D, framebufferTexture, 0);
@@ -303,7 +310,7 @@ public abstract class RenderMethod {
 		player.prevRotationPitch = prevPitch - 90;
 		er.renderWorldPass(2, partialTicks, finishTimeNano);
 	}
-	
+
 	protected void renderBottom(EntityRenderer er, Minecraft mc, float partialTicks, long finishTimeNano,
 			Entity player, int framebufferTexture, float yaw, float pitch, float prevYaw, float prevPitch) {
 		OpenGlHelper.glFramebufferTexture2D(OpenGlHelper.GL_FRAMEBUFFER, OpenGlHelper.GL_COLOR_ATTACHMENT0, GL11.GL_TEXTURE_2D, framebufferTexture, 0);
@@ -314,7 +321,7 @@ public abstract class RenderMethod {
 		player.prevRotationPitch = prevPitch + 90;
 		er.renderWorldPass(2, partialTicks, finishTimeNano);
 	}
-	
+
 	protected void renderBack(EntityRenderer er, Minecraft mc, float partialTicks, long finishTimeNano,
 			Entity player, int framebufferTexture, float yaw, float pitch, float prevYaw, float prevPitch) {
 		OpenGlHelper.glFramebufferTexture2D(OpenGlHelper.GL_FRAMEBUFFER, OpenGlHelper.GL_COLOR_ATTACHMENT0, GL11.GL_TEXTURE_2D, framebufferTexture, 0);
@@ -325,7 +332,7 @@ public abstract class RenderMethod {
 		player.prevRotationPitch = -prevPitch;
 		er.renderWorldPass(2, partialTicks, finishTimeNano);
 	}
-	
+
 	public void runShader(EntityRenderer er, Minecraft mc, Framebuffer framebuffer,
 			Shader shader, int[] framebufferTextures) {
 		//Use shader
@@ -339,7 +346,7 @@ public abstract class RenderMethod {
 		GL11.glMatrixMode(GL11.GL_MODELVIEW);
 		GL11.glPushMatrix();
 		GL11.glLoadIdentity();
-		
+
 		//Anti-aliasing
 		int pixelOffsetUniform = GL20.glGetUniformLocation(shader.getShaderProgram(), "pixelOffset[0]");
 		GL20.glUniform2f(pixelOffsetUniform, -0.25f/mc.displayWidth, -0.25f/mc.displayHeight);
@@ -364,7 +371,7 @@ public abstract class RenderMethod {
 		GL20.glUniform1i(texBottomUniform, 5);
 		int fovUniform = GL20.glGetUniformLocation(shader.getShaderProgram(), "fovx");
 		GL20.glUniform1f(fovUniform, getFOV());
-		
+
 		int backgroundUniform = GL20.glGetUniformLocation(shader.getShaderProgram(), "backgroundColor");
 		float backgroundColor[] = getBackgroundColor();
 		if (backgroundColor != null) {
@@ -385,7 +392,7 @@ public abstract class RenderMethod {
 		GL11.glBindTexture(GL11.GL_TEXTURE_2D, 0);
 		GL20.glDisableVertexAttribArray(0);
 		GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, 0);
-		
+
 		//Reset view
 		GL11.glMatrixMode(GL11.GL_PROJECTION);
 		GL11.glPopMatrix();
@@ -397,16 +404,16 @@ public abstract class RenderMethod {
 			GL13.glActiveTexture(GL13.GL_TEXTURE0+i);
 			GL11.glBindTexture(GL11.GL_TEXTURE_2D, 0);
 		}
-		
+
 		//Unbind shader
 		GL20.glUseProgram(0);
 	}
-	
+
 	public void addButtonsToGui(List<GuiButton> buttonList, int width, int height) {
 		buttonList.add(new GuiButton(18101, width / 2 - 155, height / 6 + 48, 150, 20, "Resize Gui: " + (resizeGui ? "ON" : "OFF")));
 		buttonList.add(new Slider(new Responder(), 18102, width / 2 + 5, height / 6 + 48, 150, 20, "Quality", 0.1f, 5f, quality, 0.1f, null));
 	}
-	
+
 	public void onButtonPress(GuiButton button) {
 		//Resize Gui
 		if (button.id == 18101) {
@@ -414,55 +421,55 @@ public abstract class RenderMethod {
 			button.displayString = "Resize Gui: " + (resizeGui ? "ON" : "OFF");
 		}
 	}
-	
+
 	public float getYaw() {
 		return yaw;
 	}
-	
+
 	public float getPitch() {
 		return pitch;
 	}
-	
+
 	public float getPrevYaw() {
 		return prevYaw;
 	}
-	
+
 	public float getPrevPitch() {
 		return prevPitch;
 	}
-	
+
 	public float getRotateX() {
 		return rotateX;
 	}
-	
+
 	public float getRotateY() {
 		return rotateY;
 	}
-	
+
 	public float getFOV() {
 		return 360;
 	}
-	
+
 	public float getQuality() {
 		return quality;
 	}
-	
+
 	public boolean getResizeGui() {
 		return resizeGui;
 	}
-	
+
 	public boolean replaceLoadingScreen() {
 		return false;
 	}
-	
+
 	public float[] getBackgroundColor() {
 		return null;
 	}
-	
+
 	public class Responder implements GuiResponder {
 		@Override
 		public void setEntryValue(int id, boolean value) {
-			
+
 		}
 
 		@Override
@@ -478,7 +485,7 @@ public abstract class RenderMethod {
 
 		@Override
 		public void setEntryValue(int id, String value) {
-			
+
 		}
 	}
 }
