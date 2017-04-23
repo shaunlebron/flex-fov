@@ -19,16 +19,6 @@ gradlew.bat runClient
 > But I am not actually sure if this is required, since I believe this gradle
 > setup is building the entire game itself from decompiled sources?
 
-## Deploying
-
-This will build a jar file that users can install.  (Not currently working
-when I try to install to a 1.11.2 forge mods folder.)
-
-```sh
-gradlew.bat build
-# outputs a jar to build/libs
-```
-
 ## IntelliJ Setup
 
 IntelliJ can be setup to allow autocomplete, which is useful for exploring the
@@ -54,3 +44,13 @@ The game should start with our mod installed.
 
 [intellij]:http://www.minecraftforum.net/forums/mapping-and-modding/mapping-and-modding-tutorials/2714237-forge-1-11-1-10-setting-up-mod-environment-with
 [javadoc]:http://takahikokawasaki.github.io/minecraft-resources/javadoc/forge/1.8-11.14.1.1320/
+
+## Deploying
+
+This will build a jar file that users can install.  (Not currently working
+when I try to install to a 1.11.2 forge mods folder.)
+
+```sh
+gradlew.bat build
+# outputs a jar to build/libs
+```
