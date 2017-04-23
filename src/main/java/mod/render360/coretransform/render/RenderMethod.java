@@ -167,6 +167,8 @@ public abstract class RenderMethod {
 		GL20.glUniform1i(texBottomUniform, 5);
 		int fovUniform = GL20.glGetUniformLocation(shader.getShaderProgram(), "fovx");
 		GL20.glUniform1f(fovUniform, getFOV());
+		int aspectUniform = GL20.glGetUniformLocation(shader.getShaderProgram(), "aspect");
+		GL20.glUniform1f(aspectUniform, Display.getWidth() / Display.getHeight());
 		int backgroundUniform = GL20.glGetUniformLocation(shader.getShaderProgram(), "backgroundColor");
 		GL20.glUniform4f(backgroundUniform, 0, 0, 0, 1);
 
