@@ -1,10 +1,19 @@
-# Blinky for Minecraft
+# Flex FOV
 
-Porting [blinky] features to [this minecraft mod] to demonstrate peripheral
-vision in a modern game.
+Modifying [this minecraft mod] to select allow any FOV 0-360°, but intelligently
+choosing the best projections (as seen in [blinky]).
 
 [blinky]:https://github.com/shaunlebron/blinky
 [this minecraft mod]:https://github.com/18107/MC-Render360
+
+```
+          0             90           180           270           360 degrees
+          |-------------|-------------|-------------|-------------|
+straight> |     standard      |    panini     |     mercator      |
+or        |-------------------|---------------|-------------------|
+curved>   |     standard      | stereographic |   winkel tripel   |
+          |-------------------|---------------|-------------------|
+```
 
 ## Quick Start
 
