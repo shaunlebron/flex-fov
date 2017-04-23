@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/MC-Render360.iml" filepath="$PROJECT_DIR$/.idea/modules/MC-Render360.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/MC-Render360_api.iml" filepath="$PROJECT_DIR$/.idea/modules/MC-Render360_api.iml" group="MC-Render360" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/MC-Render360_main.iml" filepath="$PROJECT_DIR$/.idea/modules/MC-Render360_main.iml" group="MC-Render360" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/MC-Render360_test.iml" filepath="$PROJECT_DIR$/.idea/modules/MC-Render360_test.iml" group="MC-Render360" />
+    </modules>
+  </component>
+</project>
