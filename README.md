@@ -29,10 +29,28 @@ gradlew.bat build
 # outputs a jar to build/libs
 ```
 
-## Dev Setup
+## IntelliJ Setup
 
-- [I setup IntelliJ][intellij] to have autocomplete for exploring the API.
-- You can refer to this [older Forge javadoc][javadoc] if you're using an editor without autocomplete.
+IntelliJ can be setup to allow autocomplete, which is useful for exploring the
+Minecraft/Forge APIs in-place.  If you don't wish to use an IDE, you can explore
+the APIs the old-fashioned way using this [Forge javadoc][javadoc] (outdated but
+probably mostly relevant).
+
+You have to create your own IntelliJ project since it cannot be easily
+version-controlled. I loosely followed [these instructions][intellij]:
+
+1. Run `./gradlew setupDecompWorkspace`
+1. Open IntelliJ
+1. 'Import Project' > choose our `build.gradle` file
+1. View > Tool Windows > Project
+1. Right click our `*.iml` file > Import Module
+1. Run `./gradlew genIntellijRuns`
+1. Restart IntelliJ
+1. Run > Edit Configurations
+1. Application > Minecraft Client > Use classpath of module > `*_main`
+1. Run > Run 'Minecraft Client'
+
+The game should start with our mod installed.
 
 [intellij]:http://www.minecraftforum.net/forums/mapping-and-modding/mapping-and-modding-tutorials/2714237-forge-1-11-1-10-setting-up-mod-environment-with
 [javadoc]:http://takahikokawasaki.github.io/minecraft-resources/javadoc/forge/1.8-11.14.1.1320/
