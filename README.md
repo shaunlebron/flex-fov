@@ -10,8 +10,8 @@ choosing the best projections (as seen in [blinky]).
           0             90           180           270           360 degrees
           |-------------|-------------|-------------|-------------|
 straight> |     standard      |    panini     |     mercator      |
-or        |-------------------|---------------|-------------------|
-curved>   |     standard      | stereographic |   winkel tripel   |
+or        |-------------------|---------------|-------------------|-> equirect when exactly 360
+curved>   |     standard      | stereographic |   winkel tripel   |   for panoramic recording
           |-------------------|---------------|-------------------|
 ```
 
