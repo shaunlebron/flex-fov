@@ -1,0 +1,85 @@
+
+shader input:
+  texcoord.x, texcoord.y
+
+shader output:
+  xyz ray to environment map
+
+-----
+
+TEXCOORD -> SCREEN
+
+
+    (0,0)
+      |---------------|
+      |               |
+      |               |       texcoord init
+      |               |
+      |---------------|
+                    (1,1)
+
+
+ (-0.5,-0.5)
+      |---------------|
+      |               |
+      |       +       |       texcoord translated
+      |               |
+      |---------------|
+                  (0.5,0.5)
+
+
+   (-1,-1)
+      |---------------|
+      |               |
+      |       +       |       texcoord scaled
+      |               |
+      |---------------|
+                    (1,1)
+
+
+   (-1,1)
+      |---------------|
+      |               |
+      |       +       |       texcoord flip y
+      |               |
+      |---------------|
+                    (1,-1)
+
+let aspect = screen w/h
+let W = 2
+=> H = 2/aspect
+let Y = H/2 = 1/aspect
+
+   (-1,Y)
+      |---------------|
+      |               |
+      |       +       |       texcoord scale y
+      |               |
+      |---------------|
+                    (1,-Y)
+
+-----
+
+SCREEN -> LENS
+
+let forward = <lens forward map>
+
+let S = forward(latlon_to_ray(0, fovx/2)).x
+
+   (-S,S*Y)
+      |---------------|
+      |               |
+      |       +       |       texcoord scale
+      |               |
+      |---------------|
+                    (S,-S*Y)
+
+-----
+
+LENS -> RAY
+
+let inverse = <lens inverse map>
+
+let ray = inverse(x,y)
+
+maybe reflect z-axis?
