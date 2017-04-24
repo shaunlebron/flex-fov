@@ -1,10 +1,12 @@
 # Flex FOV
 
-Modifying [this minecraft mod] to select allow any FOV 0-360°, but intelligently
-choosing the best projections (as seen in [blinky]).
+An experiment to display any FOV (0-360°) in a modern game.
+
+Continuing where [blinky] left off.  Rather than exposing a myriad of options,
+the goal is to provide an intelligent default projection based on the
+chosen FOV:
 
 [blinky]:https://github.com/shaunlebron/blinky
-[this minecraft mod]:https://github.com/18107/MC-Render360
 
 ```
           0             90           180           270           360 degrees
@@ -14,6 +16,10 @@ or        |-------------------|---------------|-------------------|-> equirect w
 curved>   |     standard      | stereographic |   winkel tripel   |   for panoramic recording
           |-------------------|---------------|-------------------|
 ```
+
+We are using [this minecraft mod] as the base for this experiment.
+
+[this minecraft mod]:https://github.com/18107/MC-Render360
 
 ## Quick Start
 
