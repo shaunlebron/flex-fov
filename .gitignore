@@ -5,3 +5,5 @@ run
 out
 *.iml
 .idea
+
+*.min.fs
