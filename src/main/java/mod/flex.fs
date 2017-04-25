@@ -1,6 +1,6 @@
-#version 130//\n
+#version 130
 
-#define M_PI 3.14159265//\n
+#define M_PI 3.14159265
 
 /* This comes interpolated from the vertex shader */
 in vec2 texcoord;
@@ -15,7 +15,7 @@ uniform sampler2D texBottom;
 
 uniform vec2 pixelOffset[4];
 
-//fovx\n
+//fovx
 uniform float fovx;
 uniform float aspect;
 
@@ -61,39 +61,39 @@ vec2 panini_forward(float lat, float lon) {
 void main(void) {
   /* Ray-trace a cube */
 
-	//Anti-aliasing\n
+	//Anti-aliasing
 	vec4 colorN[4];
 
 	for (int loop = 0; loop < 4; loop++) {
 
-		//create ray\n
+		//create ray
 		vec2 lenscoord = tex_to_lens(texcoord);
     lenscoord *= panini_forward(0, radians(fovx)/2).x;
     vec3 ray = panini_inverse(lenscoord);
     ray.z *= -1;
 
-		//find which side to use\n
+		//find which side to use
 		if (abs(ray.x) > abs(ray.y)) {
 			if (abs(ray.x) > abs(ray.z)) {
 				if (ray.x > 0) {
-					//right\n
+					//right
 					float x = ray.z / ray.x;
 					float y = ray.y / ray.x;
 					colorN[loop] = vec4(texture(texRight, vec2((x+1)/2, (y+1)/2)).rgb, 1);
 				} else {
-					//left\n
+					//left
 					float x = -ray.z / -ray.x;
 					float y = ray.y / -ray.x;
 					colorN[loop] = vec4(texture(texLeft, vec2((x+1)/2, (y+1)/2)).rgb, 1);
 				}
 			} else {
 				if (ray.z > 0) {
-					//back\n
+					//back
 					float x = -ray.x / ray.z;
 					float y = ray.y / ray.z;
 					colorN[loop] = vec4(texture(texBack, vec2((x+1)/2, (y+1)/2)).rgb, 1);
 				} else {
-					//front\n
+					//front
 					float x = ray.x / -ray.z;
 					float y = ray.y / -ray.z;
 					colorN[loop] = vec4(texture(texFront, vec2((x+1)/2, (y+1)/2)).rgb, 1);
@@ -102,24 +102,24 @@ void main(void) {
 		} else {
 			if (abs(ray.y) > abs(ray.z)) {
 				if (ray.y > 0) {
-					//top\n
+					//top
 					float x = ray.x / ray.y;
 					float y = ray.z / ray.y;
 					colorN[loop] = vec4(texture(texTop, vec2((x+1)/2, (y+1)/2)).rgb, 1);
 				} else {
-					//bottom\n
+					//bottom
 					float x = ray.x / -ray.y;
 					float y = -ray.z / -ray.y;
 					colorN[loop] = vec4(texture(texBottom, vec2((x+1)/2, (y+1)/2)).rgb, 1);
 				}
 			} else {
 				if (ray.z > 0) {
-					//back\n
+					//back
 					float x = -ray.x / ray.z;
 					float y = ray.y / ray.z;
 					colorN[loop] = vec4(texture(texBack, vec2((x+1)/2, (y+1)/2)).rgb, 1);
 				} else {
-					//front\n
+					//front
 					float x = ray.x / -ray.z;
 					float y = ray.y / -ray.z;
 					colorN[loop] = vec4(texture(texFront, vec2((x+1)/2, (y+1)/2)).rgb, 1);

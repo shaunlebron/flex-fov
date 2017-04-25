@@ -5,15 +5,15 @@ min=src/main/java/mod/flex.min.fs
 java=src/main/java/mod/render360/coretransform/render/Flex.java
 temp=temp
 
-search='private final String fragmentShader = "'
+search='private final String fragmentShader'
 
-cat $orig | tr '\r\n' ' ' > $min
+cat $orig | sed 's/$/\\n/' | tr -d '\r\n' | tr -d '\n' > $min
 
 line=$(grep -n "$search" $java | cut -f1 -d:)
 
 cat \
   <(head -n "$((line - 1))" $java) \
-  <(echo "  ${search}$(head -c -1 $min)\";") \
+  <(echo "  ${search} = \"$(cat $min)\";") \
   <(tail -n "+$((line + 1))" $java) \
   > $temp
 
