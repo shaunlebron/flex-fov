@@ -16,8 +16,7 @@ import org.objectweb.asm.tree.VarInsnNode;
 import mod.render360.coretransform.CLTLog;
 import mod.render360.coretransform.CoreLoader;
 import mod.render360.coretransform.RenderUtil;
-import mod.render360.coretransform.render.Equirectangular;
-import mod.render360.coretransform.render.Panini;
+import mod.render360.coretransform.render.Flex;
 import mod.render360.coretransform.render.RenderMethod;
 
 import static org.objectweb.asm.Opcodes.*;

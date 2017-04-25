@@ -49,11 +49,7 @@ public abstract class RenderMethod {
 		//Put all of the render methods here
 		renderMethods = new RenderMethod[] {
 			new Standard(),
-			new Cubic(),
-			new Hammer(),
-			new Equirectangular(),
-			new EquirectangularStatic(),
-			new Panini(),
+			new Flex(),
 		};
 	}
 

@@ -25,22 +25,7 @@ uniform bool drawCursor;
 
 out vec4 color;
 
-vec3 rotate(vec3 ray, vec2 angle) {
 
-  //rotate y\n
-  float y = -sin(angle.y)*ray.z;
-  float z = cos(angle.y)*ray.z;
-  ray.y = y;
-  ray.z = z;
-
-  //rotate x\n
-  float x = -sin(angle.x)*ray.z;
-  z = cos(angle.x)*ray.z;
-  ray.x = x;
-  ray.z = z;
-
-  return ray;
-}
 
 void main(void) {
   /* Ray-trace a cube */
