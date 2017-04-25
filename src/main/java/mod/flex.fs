@@ -25,24 +25,52 @@ uniform bool drawCursor;
 
 out vec4 color;
 
+vec2 tex_to_lens(vec2 tex) {
+  return (tex - vec2(0.5, 0.5)) * vec2(2, -2/aspect);
+}
 
+vec3 latlon_to_ray(float lat, float lon) {
+  return vec3(
+    sin(lon)*cos(lat),
+    sin(lat),
+    cos(lon)*cos(lat)
+  );
+}
+
+vec3 panini_inverse(vec2 lenscoord) {
+  float x = lenscoord.x;
+  float y = lenscoord.y;
+  float d = 1;
+  float k = x*x/((d+1)*(d+1));
+  float dscr = k*k*d*d - (k+1)*(k*d*d-1);
+  float clon = (-k*d+sqrt(dscr))/(k+1);
+  float S = (d+1)/(d+clon);
+  float lon = atan(x,S*clon);
+  float lat = atan(y,S);
+  return latlon_to_ray(lat, lon);
+}
+
+vec2 panini_forward(float lat, float lon) {
+  float d = 1;
+  float S = (d+1)/(d+cos(lon));
+  float x = S*sin(lon);
+  float y = S*tan(lat);
+  return vec2(x,y);
+}
 
 void main(void) {
   /* Ray-trace a cube */
 
-	//Anti-aliasing
+	//Anti-aliasing\n
 	vec4 colorN[4];
 
 	for (int loop = 0; loop < 4; loop++) {
 
 		//create ray\n
-		vec3 ray = vec3(0, 0, -1);
-
-		//rotate ray\n
-		ray = rotate(ray, vec2(
-      (texcoord.x+pixelOffset[loop].x-0.5)*2*M_PI*fovx/360,
-      (texcoord.y+pixelOffset[loop].y-0.5)*M_PI*fovx/360
-    )); //x (-pi to pi), y (-pi/2 to pi/2\n
+		vec2 lenscoord = tex_to_lens(texcoord);
+    lenscoord *= panini_forward(0, radians(fovx)/2).x;
+    vec3 ray = panini_inverse(lenscoord);
+    ray.z *= -1;
 
 		//find which side to use\n
 		if (abs(ray.x) > abs(ray.y)) {
