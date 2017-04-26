@@ -23,6 +23,8 @@ uniform vec2 cursorPos;
 
 uniform bool drawCursor;
 
+uniform vec4 backgroundColor;
+
 out vec4 color;
 
 vec2 tex_to_lens(vec2 tex) {
@@ -45,7 +47,6 @@ vec3 standard_inverse(vec2 lenscoord) {
   float s = sin(theta);
   return vec3(x/r*s, y/r*s, cos(theta));
 }
-
 vec2 standard_forward(float lat, float lon) {
   vec3 ray = latlon_to_ray(lat, lon);
   float x = ray.x;
@@ -69,7 +70,6 @@ vec3 panini_inverse(vec2 lenscoord) {
   float lat = atan(y,S);
   return latlon_to_ray(lat, lon);
 }
-
 vec2 panini_forward(float lat, float lon) {
   float d = 1;
   float S = (d+1)/(d+cos(lon));
@@ -83,10 +83,23 @@ vec3 mercator_inverse(vec2 lenscoord) {
   float lat = atan(sinh(lenscoord.y));
   return latlon_to_ray(lat, lon);
 }
-
 vec2 mercator_forward(float lat, float lon) {
   float x = lon;
   float y = log(tan(M_PI*0.25+lat*0.5));
+  return vec2(x,y);
+}
+
+bool equirect_inbounds(vec2 lenscoord) {
+  return abs(lenscoord.x) <= M_PI && abs(lenscoord.y) <= M_PI/2;
+}
+vec3 equirect_inverse(vec2 lenscoord) {
+  float lon = lenscoord.x;
+  float lat = lenscoord.y;
+  return latlon_to_ray(lat, lon);
+}
+vec2 equirect_forward(float lat, float lon) {
+  float x = lon;
+  float y = lat;
   return vec2(x,y);
 }
 
@@ -110,6 +123,13 @@ void main(void) {
     } else if (fovx < 360) {
       lenscoord *= mercator_forward(0, radians(fovx)/2).x;
       ray = mercator_inverse(lenscoord);
+    } else if (fovx == 360) {
+      lenscoord *= equirect_forward(0, radians(fovx)/2).x;
+      if (!equirect_inbounds(lenscoord)) {
+        colorN[loop] = backgroundColor;
+        continue;
+      }
+      ray = equirect_inverse(lenscoord);
     }
     ray.z *= -1;
 
