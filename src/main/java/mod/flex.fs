@@ -89,10 +89,10 @@ vec2 mercator_forward(float lat, float lon) {
   return vec2(x,y);
 }
 
-bool equirect_inbounds(vec2 lenscoord) {
-  return abs(lenscoord.x) <= M_PI && abs(lenscoord.y) <= M_PI/2;
-}
 vec3 equirect_inverse(vec2 lenscoord) {
+  if (abs(lenscoord.x) > M_PI || abs(lenscoord.y) > M_PI/2) {
+    return vec3(0,0,0);
+  }
   float lon = lenscoord.x;
   float lat = lenscoord.y;
   return latlon_to_ray(lat, lon);
@@ -125,13 +125,14 @@ void main(void) {
       ray = mercator_inverse(lenscoord);
     } else if (fovx == 360) {
       lenscoord *= equirect_forward(0, radians(fovx)/2).x;
-      if (!equirect_inbounds(lenscoord)) {
-        colorN[loop] = backgroundColor;
-        continue;
-      }
       ray = equirect_inverse(lenscoord);
     }
     ray.z *= -1;
+
+    if (length(ray) == 0) {
+      colorN[loop] = backgroundColor;
+      continue;
+    }
 
 		//find which side to use
 		if (abs(ray.x) > abs(ray.y)) {
