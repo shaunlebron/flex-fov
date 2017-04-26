@@ -1,5 +1,7 @@
 #!/bin/bash
 
+# Dump the shader file into the appropriate Java string.
+
 orig=src/main/java/mod/flex.fs
 min=src/main/java/mod/flex.min.fs
 java=src/main/java/mod/render360/coretransform/render/Flex.java
