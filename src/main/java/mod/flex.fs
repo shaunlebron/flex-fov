@@ -26,7 +26,7 @@ uniform bool drawCursor;
 out vec4 color;
 
 vec2 tex_to_lens(vec2 tex) {
-  return (tex - vec2(0.5, 0.5)) * vec2(2, -2/aspect);
+  return (tex - vec2(0.5, 0.5)) * vec2(2,2/aspect);
 }
 
 vec3 latlon_to_ray(float lat, float lon) {
