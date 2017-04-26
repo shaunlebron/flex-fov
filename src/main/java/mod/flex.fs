@@ -78,6 +78,18 @@ vec2 panini_forward(float lat, float lon) {
   return vec2(x,y);
 }
 
+vec3 mercator_inverse(vec2 lenscoord) {
+  float lon = lenscoord.x;
+  float lat = atan(sinh(lenscoord.y));
+  return latlon_to_ray(lat, lon);
+}
+
+vec2 mercator_forward(float lat, float lon) {
+  float x = lon;
+  float y = log(tan(M_PI*0.25+lat*0.5));
+  return vec2(x,y);
+}
+
 void main(void) {
   /* Ray-trace a cube */
 
@@ -95,6 +107,9 @@ void main(void) {
     } else if (fovx < 200) {
       lenscoord *= panini_forward(0, radians(fovx)/2).x;
       ray = panini_inverse(lenscoord);
+    } else if (fovx < 360) {
+      lenscoord *= mercator_forward(0, radians(fovx)/2).x;
+      ray = mercator_inverse(lenscoord);
     }
     ray.z *= -1;
 
