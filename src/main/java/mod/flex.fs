@@ -128,16 +128,20 @@ void main(void) {
 	for (int loop = 0; loop < 4; loop++) {
 
 		//create ray
-		vec2 lenscoord = tex_to_lens(texcoord);
+		vec2 c = tex_to_lens(texcoord);
     vec3 ray;
     if (fovx < 120) {
-      ray = standard_ray(lenscoord);
+      ray = standard_ray(c);
+    } else if (fovx < 140) {
+      ray = mix(standard_ray(c), panini_ray(c), (fovx - 120)/ 20.0);
     } else if (fovx < 200) {
-      ray = panini_ray(lenscoord);
+      ray = panini_ray(c);
+    } else if (fovx < 220) {
+      ray = mix(panini_ray(c), mercator_ray(c), (fovx - 200)/ 20.0);
     } else if (fovx < 360) {
-      ray = mercator_ray(lenscoord);
+      ray = mercator_ray(c);
     } else if (fovx == 360) {
-      ray = equirect_ray(lenscoord);
+      ray = equirect_ray(c);
     }
     ray.z *= -1;
 
