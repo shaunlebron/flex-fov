@@ -1,3 +1,6 @@
+// NOTE: run update-shader.sh to dump this file into the appropriate Java string
+// for compilation.
+
 #version 130
 
 #define M_PI 3.14159265
