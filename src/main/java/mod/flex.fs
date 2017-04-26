@@ -130,6 +130,8 @@ void main(void) {
 
 	for (int loop = 0; loop < 4; loop++) {
 
+    float alpha = 1;
+
 		//create ray
 		vec2 c = tex_to_lens(texcoord);
     vec3 ray;
@@ -141,8 +143,12 @@ void main(void) {
       ray = panini_ray(c);
     } else if (fovx < 220) {
       ray = mix(panini_ray(c), mercator_ray(c), (fovx - 200)/ 20.0);
-    } else if (fovx < 360) {
+    } else if (fovx < 340) {
       ray = mercator_ray(c);
+    } else if (fovx < 360) {
+      ray = mix(mercator_ray(c), equirect_ray(c), (fovx - 340)/ 20.0);
+      float len = length(ray);
+      alpha = clamp(len*2, 0, 1);
     } else if (fovx == 360) {
       ray = equirect_ray(c);
     }
@@ -207,6 +213,8 @@ void main(void) {
 				}
 			}
 		}
+
+    colorN[loop] = mix(vec4(0,0,0,1), colorN[loop], alpha);
 
 		if (drawCursor) {
 			vec2 normalAngle = cursorPos*2 - 1;
