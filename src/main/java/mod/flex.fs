@@ -57,6 +57,10 @@ vec2 standard_forward(float lat, float lon) {
   float c = r/length(ray.xy);
   return vec2(x*c, y*c);
 }
+vec3 standard_ray(vec2 lenscoord) {
+  float scale = standard_forward(0, radians(fovx)/2).x;
+  return standard_inverse(lenscoord * scale);
+}
 
 vec3 panini_inverse(vec2 lenscoord) {
   float x = lenscoord.x;
@@ -77,6 +81,10 @@ vec2 panini_forward(float lat, float lon) {
   float y = S*tan(lat);
   return vec2(x,y);
 }
+vec3 panini_ray(vec2 lenscoord) {
+  float scale = panini_forward(0, radians(fovx)/2).x;
+  return panini_inverse(lenscoord * scale);
+}
 
 vec3 mercator_inverse(vec2 lenscoord) {
   float lon = lenscoord.x;
@@ -87,6 +95,10 @@ vec2 mercator_forward(float lat, float lon) {
   float x = lon;
   float y = log(tan(M_PI*0.25+lat*0.5));
   return vec2(x,y);
+}
+vec3 mercator_ray(vec2 lenscoord) {
+  float scale = mercator_forward(0, radians(fovx)/2).x;
+  return mercator_inverse(lenscoord * scale);
 }
 
 vec3 equirect_inverse(vec2 lenscoord) {
@@ -102,6 +114,10 @@ vec2 equirect_forward(float lat, float lon) {
   float y = lat;
   return vec2(x,y);
 }
+vec3 equirect_ray(vec2 lenscoord) {
+  float scale = equirect_forward(0, radians(fovx)/2).x;
+  return equirect_inverse(lenscoord * scale);
+}
 
 void main(void) {
   /* Ray-trace a cube */
@@ -115,17 +131,13 @@ void main(void) {
 		vec2 lenscoord = tex_to_lens(texcoord);
     vec3 ray;
     if (fovx < 120) {
-      lenscoord *= standard_forward(0, radians(fovx)/2).x;
-      ray = standard_inverse(lenscoord);
+      ray = standard_ray(lenscoord);
     } else if (fovx < 200) {
-      lenscoord *= panini_forward(0, radians(fovx)/2).x;
-      ray = panini_inverse(lenscoord);
+      ray = panini_ray(lenscoord);
     } else if (fovx < 360) {
-      lenscoord *= mercator_forward(0, radians(fovx)/2).x;
-      ray = mercator_inverse(lenscoord);
+      ray = mercator_ray(lenscoord);
     } else if (fovx == 360) {
-      lenscoord *= equirect_forward(0, radians(fovx)/2).x;
-      ray = equirect_inverse(lenscoord);
+      ray = equirect_ray(lenscoord);
     }
     ray.z *= -1;
 
