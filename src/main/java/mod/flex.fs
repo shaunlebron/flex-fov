@@ -37,6 +37,26 @@ vec3 latlon_to_ray(float lat, float lon) {
   );
 }
 
+vec3 standard_inverse(vec2 lenscoord) {
+  float x = lenscoord.x;
+  float y = lenscoord.y;
+  float r = length(lenscoord);
+  float theta = atan(r);
+  float s = sin(theta);
+  return vec3(x/r*s, y/r*s, cos(theta));
+}
+
+vec2 standard_forward(float lat, float lon) {
+  vec3 ray = latlon_to_ray(lat, lon);
+  float x = ray.x;
+  float y = ray.y;
+  float z = ray.z;
+  float theta = acos(z);
+  float r = tan(theta);
+  float c = r/length(ray.xy);
+  return vec2(x*c, y*c);
+}
+
 vec3 panini_inverse(vec2 lenscoord) {
   float x = lenscoord.x;
   float y = lenscoord.y;
@@ -68,8 +88,14 @@ void main(void) {
 
 		//create ray
 		vec2 lenscoord = tex_to_lens(texcoord);
-    lenscoord *= panini_forward(0, radians(fovx)/2).x;
-    vec3 ray = panini_inverse(lenscoord);
+    vec3 ray;
+    if (fovx < 120) {
+      lenscoord *= standard_forward(0, radians(fovx)/2).x;
+      ray = standard_inverse(lenscoord);
+    } else if (fovx < 200) {
+      lenscoord *= panini_forward(0, radians(fovx)/2).x;
+      ray = panini_inverse(lenscoord);
+    }
     ray.z *= -1;
 
 		//find which side to use
