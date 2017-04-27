@@ -30,10 +30,6 @@ uniform vec4 backgroundColor;
 
 out vec4 color;
 
-vec2 tex_to_lens(vec2 tex) {
-  return (tex - vec2(0.5, 0.5)) * vec2(2,2/aspect);
-}
-
 vec3 latlon_to_ray(float lat, float lon) {
   return vec3(
     sin(lon)*cos(lat),
@@ -144,113 +140,127 @@ vec3 stereographic_ray(vec2 lenscoord) {
   return stereographic_inverse(lenscoord * scale);
 }
 
-void main(void) {
-  /* Ray-trace a cube */
-
-	//Anti-aliasing
-	vec4 colorN[4];
-
-	for (int loop = 0; loop < 4; loop++) {
-
-    float alpha = 1;
-
-		//create ray
-		vec2 c = tex_to_lens(texcoord);
-    vec3 ray;
-    if (fovx < 120) {
-      ray = standard_ray(c);
-    } else if (fovx < 140) {
-      ray = mix(standard_ray(c), stereographic_ray(c), (fovx - 120)/ 20.0);
-    } else if (fovx < 200) {
-      ray = stereographic_ray(c);
-    } else if (fovx < 220) {
-      ray = mix(stereographic_ray(c), mercator_ray(c), (fovx - 200)/ 20.0);
-    } else if (fovx < 340) {
-      ray = mercator_ray(c);
-    } else if (fovx < 360) {
-      ray = mix(mercator_ray(c), equirect_ray(c), (fovx - 340)/ 20.0);
-      float len = length(ray);
-      alpha = clamp(len*2, 0, 1);
-    } else if (fovx == 360) {
-      ray = equirect_ray(c);
+vec4 ray_to_color(vec3 ray) {
+  //find which side to use
+  if (abs(ray.x) > abs(ray.y)) {
+    if (abs(ray.x) > abs(ray.z)) {
+      if (ray.x > 0) {
+        //right
+        float x = ray.z / ray.x;
+        float y = ray.y / ray.x;
+        return vec4(texture(texRight, vec2((x+1)/2, (y+1)/2)).rgb, 1);
+      } else {
+        //left
+        float x = -ray.z / -ray.x;
+        float y = ray.y / -ray.x;
+        return vec4(texture(texLeft, vec2((x+1)/2, (y+1)/2)).rgb, 1);
+      }
     } else {
-      ray = vec3(0,0,0);
+      if (ray.z > 0) {
+        //back
+        float x = -ray.x / ray.z;
+        float y = ray.y / ray.z;
+        return vec4(texture(texBack, vec2((x+1)/2, (y+1)/2)).rgb, 1);
+      } else {
+        //front
+        float x = ray.x / -ray.z;
+        float y = ray.y / -ray.z;
+        return vec4(texture(texFront, vec2((x+1)/2, (y+1)/2)).rgb, 1);
+      }
     }
-    ray.z *= -1;
-
-    if (length(ray) == 0) {
-      colorN[loop] = backgroundColor;
-      continue;
+  } else {
+    if (abs(ray.y) > abs(ray.z)) {
+      if (ray.y > 0) {
+        //top
+        float x = ray.x / ray.y;
+        float y = ray.z / ray.y;
+        return vec4(texture(texTop, vec2((x+1)/2, (y+1)/2)).rgb, 1);
+      } else {
+        //bottom
+        float x = ray.x / -ray.y;
+        float y = -ray.z / -ray.y;
+        return vec4(texture(texBottom, vec2((x+1)/2, (y+1)/2)).rgb, 1);
+      }
+    } else {
+      if (ray.z > 0) {
+        //back
+        float x = -ray.x / ray.z;
+        float y = ray.y / ray.z;
+        return vec4(texture(texBack, vec2((x+1)/2, (y+1)/2)).rgb, 1);
+      } else {
+        //front
+        float x = ray.x / -ray.z;
+        float y = ray.y / -ray.z;
+        return vec4(texture(texFront, vec2((x+1)/2, (y+1)/2)).rgb, 1);
+      }
     }
+  }
+}
 
-		//find which side to use
-		if (abs(ray.x) > abs(ray.y)) {
-			if (abs(ray.x) > abs(ray.z)) {
-				if (ray.x > 0) {
-					//right
-					float x = ray.z / ray.x;
-					float y = ray.y / ray.x;
-					colorN[loop] = vec4(texture(texRight, vec2((x+1)/2, (y+1)/2)).rgb, 1);
-				} else {
-					//left
-					float x = -ray.z / -ray.x;
-					float y = ray.y / -ray.x;
-					colorN[loop] = vec4(texture(texLeft, vec2((x+1)/2, (y+1)/2)).rgb, 1);
-				}
-			} else {
-				if (ray.z > 0) {
-					//back
-					float x = -ray.x / ray.z;
-					float y = ray.y / ray.z;
-					colorN[loop] = vec4(texture(texBack, vec2((x+1)/2, (y+1)/2)).rgb, 1);
-				} else {
-					//front
-					float x = ray.x / -ray.z;
-					float y = ray.y / -ray.z;
-					colorN[loop] = vec4(texture(texFront, vec2((x+1)/2, (y+1)/2)).rgb, 1);
-				}
-			}
-		} else {
-			if (abs(ray.y) > abs(ray.z)) {
-				if (ray.y > 0) {
-					//top
-					float x = ray.x / ray.y;
-					float y = ray.z / ray.y;
-					colorN[loop] = vec4(texture(texTop, vec2((x+1)/2, (y+1)/2)).rgb, 1);
-				} else {
-					//bottom
-					float x = ray.x / -ray.y;
-					float y = -ray.z / -ray.y;
-					colorN[loop] = vec4(texture(texBottom, vec2((x+1)/2, (y+1)/2)).rgb, 1);
-				}
-			} else {
-				if (ray.z > 0) {
-					//back
-					float x = -ray.x / ray.z;
-					float y = ray.y / ray.z;
-					colorN[loop] = vec4(texture(texBack, vec2((x+1)/2, (y+1)/2)).rgb, 1);
-				} else {
-					//front
-					float x = ray.x / -ray.z;
-					float y = ray.y / -ray.z;
-					colorN[loop] = vec4(texture(texFront, vec2((x+1)/2, (y+1)/2)).rgb, 1);
-				}
-			}
-		}
+vec2 tex_to_lens(vec2 tex) {
+  return (tex - vec2(0.5, 0.5)) * vec2(2,2/aspect);
+}
 
-    colorN[loop] = mix(vec4(0,0,0,1), colorN[loop], alpha);
+vec3 tex_to_ray(vec2 texcoord) {
+  vec3 ray;
+  vec2 c = tex_to_lens(texcoord);
+  if (fovx < 120) {
+    ray = standard_ray(c);
+  } else if (fovx < 140) {
+    ray = mix(standard_ray(c), stereographic_ray(c), (fovx - 120)/ 20.0);
+  } else if (fovx < 200) {
+    ray = stereographic_ray(c);
+  } else if (fovx < 220) {
+    ray = mix(stereographic_ray(c), mercator_ray(c), (fovx - 200)/ 20.0);
+  } else if (fovx < 340) {
+    ray = mercator_ray(c);
+  } else if (fovx < 360) {
+    ray = mix(mercator_ray(c), equirect_ray(c), (fovx - 340)/ 20.0);
+    float len = length(ray);
+    // alpha = clamp(len*2, 0, 1);
+  } else if (fovx == 360) {
+    ray = equirect_ray(c);
+  } else {
+    ray = vec3(0,0,0);
+  }
+  ray.z *= -1;
+  return ray;
+}
 
-		if (drawCursor) {
-			vec2 normalAngle = cursorPos*2 - 1;
-			float x = ray.x / -ray.z;
-			float y = ray.y / -ray.z;
-			if (x <= normalAngle.x + 0.01 && y <= normalAngle.y + 0.01 &&
-				x >= normalAngle.x - 0.01 && y >= normalAngle.y - 0.01 &&
-				ray.z < 0) {
-				colorN[loop] = vec4(1, 1, 1, 1);
-			}
-		}
-	}
+bool isRayOnCursor(vec3 ray) {
+  vec2 normalAngle = cursorPos*2 - 1;
+  float x = ray.x / -ray.z;
+  float y = ray.y / -ray.z;
+  return (
+    x <= normalAngle.x + 0.01 && y <= normalAngle.y + 0.01 &&
+    x >= normalAngle.x - 0.01 && y >= normalAngle.y - 0.01 &&
+    ray.z < 0
+  );
+}
 
-	color = mix(mix(colorN[0], colorN[1], 0.5), mix(colorN[2], colorN[3], 0.5), 0.5);
+vec4 tex_color(vec2 texcoord) {
+  vec3 ray = tex_to_ray(texcoord);
+  if (length(ray) == 0) {
+    return backgroundColor;
+  }
+  vec4 c = ray_to_color(ray);
+  if (drawCursor && isRayOnCursor(ray)) {
+    c += vec4(1, 1, 1, 1);
+  }
+  return c;
+}
+
+vec4 antialias_color(vec2 texcoord) {
+  vec4 c = vec4(0,0,0,0);
+  for (int i = 0; i < 4; i++) {
+    c += tex_color(texcoord + pixelOffset[i]);
+  }
+  return c / 4;
+}
+
+void main(void) {
+  color = tex_color(texcoord);
+
+  // Uncomment this to use anti-aliasing instead.
+  // color = antialias_color(texcoord);
 }
