@@ -122,6 +122,28 @@ vec3 equirect_ray(vec2 lenscoord) {
   return equirect_inverse(lenscoord * scale);
 }
 
+vec3 stereographic_inverse(vec2 lenscoord) {
+  float x = lenscoord.x;
+  float y = lenscoord.y;
+  float angleScale = 0.5;
+  float r = length(lenscoord);
+  float theta = atan(r)/angleScale;
+  float s = sin(theta);
+  return vec3(x/r*s, y/r*s, cos(theta));
+}
+vec2 stereographic_forward(float lat, float lon) {
+  vec3 ray = latlon_to_ray(lat, lon);
+  float theta = acos(ray.z);
+  float angleScale = 0.5;
+  float r = tan(theta*angleScale);
+  float c = r/length(ray.xy);
+  return vec2(ray.x*c, ray.y*c);
+}
+vec3 stereographic_ray(vec2 lenscoord) {
+  float scale = stereographic_forward(0, radians(fovx)/2).x;
+  return stereographic_inverse(lenscoord * scale);
+}
+
 void main(void) {
   /* Ray-trace a cube */
 
@@ -138,11 +160,11 @@ void main(void) {
     if (fovx < 120) {
       ray = standard_ray(c);
     } else if (fovx < 140) {
-      ray = mix(standard_ray(c), panini_ray(c), (fovx - 120)/ 20.0);
+      ray = mix(standard_ray(c), stereographic_ray(c), (fovx - 120)/ 20.0);
     } else if (fovx < 200) {
-      ray = panini_ray(c);
+      ray = stereographic_ray(c);
     } else if (fovx < 220) {
-      ray = mix(panini_ray(c), mercator_ray(c), (fovx - 200)/ 20.0);
+      ray = mix(stereographic_ray(c), mercator_ray(c), (fovx - 200)/ 20.0);
     } else if (fovx < 340) {
       ray = mercator_ray(c);
     } else if (fovx < 360) {
@@ -151,6 +173,8 @@ void main(void) {
       alpha = clamp(len*2, 0, 1);
     } else if (fovx == 360) {
       ray = equirect_ray(c);
+    } else {
+      ray = vec3(0,0,0);
     }
     ray.z *= -1;
 
