@@ -140,58 +140,58 @@ vec3 stereographic_ray(vec2 lenscoord) {
   return stereographic_inverse(lenscoord * scale);
 }
 
+vec4 rubix_color(vec2 coord, vec3 hue) {
+  int numCells = 10;
+  int cellSize = 4;
+  int padSize = 1;
+
+  int blockSize = padSize + cellSize;
+  int numUnits = numCells * blockSize + padSize;
+
+  bool onGrid = (
+    mod(coord.x * numUnits, blockSize) < padSize ||
+    mod(coord.y * numUnits, blockSize) < padSize
+  );
+
+  return onGrid ? vec4(0,0,0,0) : vec4(hue, 0.3);
+}
+
+vec4 texcoord_color(sampler2D tex, vec3 hue, vec2 coord) {
+  coord = (coord + vec2(1,1)) / 2;
+  vec4 color = texture(tex, coord);
+  vec4 rubix = rubix_color(coord, hue);
+  float a = rubix.a;
+  return vec4((1-a)*color.rgb + a*rubix.rgb, 1);
+}
+
 vec4 ray_to_color(vec3 ray) {
   //find which side to use
   if (abs(ray.x) > abs(ray.y)) {
     if (abs(ray.x) > abs(ray.z)) {
       if (ray.x > 0) {
-        //right
-        float x = ray.z / ray.x;
-        float y = ray.y / ray.x;
-        return vec4(texture(texRight, vec2((x+1)/2, (y+1)/2)).rgb, 1);
+        return texcoord_color(texRight, vec3(0,0,1), vec2(ray.z/ray.x, ray.y/ray.x));
       } else {
-        //left
-        float x = -ray.z / -ray.x;
-        float y = ray.y / -ray.x;
-        return vec4(texture(texLeft, vec2((x+1)/2, (y+1)/2)).rgb, 1);
+        return texcoord_color(texLeft, vec3(1,0,0), vec2(ray.z/ray.x, -ray.y/ray.x));
       }
     } else {
       if (ray.z > 0) {
-        //back
-        float x = -ray.x / ray.z;
-        float y = ray.y / ray.z;
-        return vec4(texture(texBack, vec2((x+1)/2, (y+1)/2)).rgb, 1);
+        return texcoord_color(texBack, vec3(1,1,0), vec2(-ray.x/ray.z, ray.y/ray.z));
       } else {
-        //front
-        float x = ray.x / -ray.z;
-        float y = ray.y / -ray.z;
-        return vec4(texture(texFront, vec2((x+1)/2, (y+1)/2)).rgb, 1);
+        return texcoord_color(texFront, vec3(1,1,1), vec2(-ray.x/ray.z, -ray.y/ray.z));
       }
     }
   } else {
     if (abs(ray.y) > abs(ray.z)) {
       if (ray.y > 0) {
-        //top
-        float x = ray.x / ray.y;
-        float y = ray.z / ray.y;
-        return vec4(texture(texTop, vec2((x+1)/2, (y+1)/2)).rgb, 1);
+        return texcoord_color(texTop, vec3(1,0,1), vec2(ray.x/ray.y, ray.z/ray.y));
       } else {
-        //bottom
-        float x = ray.x / -ray.y;
-        float y = -ray.z / -ray.y;
-        return vec4(texture(texBottom, vec2((x+1)/2, (y+1)/2)).rgb, 1);
+        return texcoord_color(texBottom, vec3(0,1,1), vec2(-ray.x/ray.y, ray.z/ray.y));
       }
     } else {
       if (ray.z > 0) {
-        //back
-        float x = -ray.x / ray.z;
-        float y = ray.y / ray.z;
-        return vec4(texture(texBack, vec2((x+1)/2, (y+1)/2)).rgb, 1);
+        return texcoord_color(texBack, vec3(1,1,0), vec2(-ray.x/ray.z, ray.y/ray.z));
       } else {
-        //front
-        float x = ray.x / -ray.z;
-        float y = ray.y / -ray.z;
-        return vec4(texture(texFront, vec2((x+1)/2, (y+1)/2)).rgb, 1);
+        return texcoord_color(texFront, vec3(1,1,1), vec2(-ray.x/ray.z, -ray.y/ray.z));
       }
     }
   }
