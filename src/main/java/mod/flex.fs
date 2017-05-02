@@ -23,7 +23,9 @@ uniform float fovx;
 uniform float aspect;
 uniform float pitch;
 
+// boolean uniforms have to be ints (0=false, 1=true)
 uniform int rubix;
+uniform int split;
 
 uniform vec2 cursorPos;
 
@@ -145,8 +147,18 @@ vec3 stereographic_ray(vec2 lenscoord) {
 
 
 // Use panini when looking straight, and stereographic when looking down
-vec3 hybrid_stereo_ray(vec2 c) {
-  return mix(panini_ray(c), stereographic_ray(c), abs(pitch) / 90);
+// NOTE: `i` represents which split screen we are on so we can compare the projections
+// we are trying to fuse.
+vec3 hybrid_stereo_ray(vec2 c, int i) {
+  if (i == 0) {
+    return mix(panini_ray(c), stereographic_ray(c), abs(pitch) / 90);
+  } else if (i == 1) {
+    return panini_ray(c);
+  } else if (i == 2) {
+    return stereographic_ray(c);
+  } else {
+    return vec3(0,0,0);
+  }
 }
 
 vec4 rubix_color(vec2 coord, vec3 hue) {
@@ -209,21 +221,42 @@ vec4 ray_to_color(vec3 ray) {
   }
 }
 
-vec2 tex_to_lens(vec2 tex) {
+vec2 tex_to_screen(vec2 tex, float aspect) {
   return (tex - vec2(0.5, 0.5)) * vec2(2,2/aspect);
 }
 
-vec3 tex_to_ray(vec2 texcoord) {
+vec2 tex_to_splitscreen(vec2 tex, out int i) {
+  if (tex.y > 0.5) {
+    if (tex.x < 0.5) {
+      i = 1;
+      return tex_to_screen((tex - vec2(0, 0.5)) * vec2(2, 2), aspect);
+    } else {
+      i = 2;
+      return tex_to_screen((tex - vec2(0.5, 0.5)) * vec2(2, 2), aspect);
+    }
+  } else {
+    i = 0;
+    // oldx -> newx
+    // 0    -> -0.5
+    // 0.25 -> 0
+    // 0.75 -> 1
+    // 1    -> 1.5
+    return tex_to_screen((tex * vec2(2, 2)) - vec2(0.5, 0), aspect);
+  }
+}
+
+// NOTE: `c` represents the lens coordinate, and `i` represents the split screen
+// number (0-2) that we use to compare projections.
+vec3 screen_to_ray(vec2 c, int i) {
   vec3 ray;
-  vec2 c = tex_to_lens(texcoord);
   if (fovx < 120) {
     ray = standard_ray(c);
   } else if (fovx < 140) {
-    ray = mix(standard_ray(c), hybrid_stereo_ray(c), (fovx - 120)/ 20.0);
+    ray = mix(standard_ray(c), hybrid_stereo_ray(c, i), (fovx - 120)/ 20.0);
   } else if (fovx < 200) {
-    ray = hybrid_stereo_ray(c);
+    ray = hybrid_stereo_ray(c, i);
   } else if (fovx < 220) {
-    ray = mix(hybrid_stereo_ray(c), mercator_ray(c), (fovx - 200)/ 20.0);
+    ray = mix(hybrid_stereo_ray(c, i), mercator_ray(c), (fovx - 200)/ 20.0);
   } else if (fovx < 340) {
     ray = mercator_ray(c);
   } else if (fovx < 360) {
@@ -239,40 +272,52 @@ vec3 tex_to_ray(vec2 texcoord) {
   return ray;
 }
 
-bool isRayOnCursor(vec3 ray) {
-  vec2 normalAngle = cursorPos*2 - 1;
-  float x = ray.x / -ray.z;
-  float y = ray.y / -ray.z;
-  return (
-    x <= normalAngle.x + 0.01 && y <= normalAngle.y + 0.01 &&
-    x >= normalAngle.x - 0.01 && y >= normalAngle.y - 0.01 &&
-    ray.z < 0
-  );
+bool isScreenCursor(vec2 screen) {
+  if (split == 0) {
+    return false;
+  }
+  float thick = 0.0025;
+  float w = 0.025;
+  if (abs(screen.x) < w && abs(screen.y) < w) {
+    return abs(screen.y) < thick || abs(screen.x) < thick;
+  }
+  return false;
 }
 
-vec4 tex_color(vec2 texcoord) {
-  vec3 ray = tex_to_ray(texcoord);
+vec4 screen_color(vec2 screen, int i) {
+  vec3 ray = screen_to_ray(screen, i);
   if (length(ray) == 0) {
     return backgroundColor;
   }
   vec4 c = ray_to_color(ray);
-  if (drawCursor && isRayOnCursor(ray)) {
+  if (isScreenCursor(screen)) {
     c += vec4(1, 1, 1, 1);
   }
   return c;
 }
 
-vec4 antialias_color(vec2 texcoord) {
+vec4 screen_color_antialias(vec2 screen, int i) {
   vec4 c = vec4(0,0,0,0);
-  for (int i = 0; i < 4; i++) {
-    c += tex_color(texcoord + pixelOffset[i]);
+  for (int j = 0; j < 4; j++) {
+    c += screen_color(screen + pixelOffset[j], i);
   }
   return c / 4;
 }
 
 void main(void) {
-  color = tex_color(texcoord);
+  int i;
+  vec2 screen;
 
-  // Uncomment this to use anti-aliasing instead.
-  // color = antialias_color(texcoord);
+  if (split == 0) {
+    i = 0;
+    screen = tex_to_screen(texcoord, aspect);
+  } else {
+    screen = tex_to_splitscreen(texcoord, i);
+  }
+
+  if (abs(screen.x) > 1) {
+    color = backgroundColor;
+  } else {
+    color = screen_color_antialias(screen, i);
+  }
 }
