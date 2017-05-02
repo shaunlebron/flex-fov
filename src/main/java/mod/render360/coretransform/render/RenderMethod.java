@@ -36,6 +36,7 @@ public abstract class RenderMethod {
 
 	protected static float quality = 1;
 	protected static boolean resizeGui = false;
+	protected static boolean rubix = false;
 
 	private float yaw; //TODO remove
 	private float pitch;
@@ -371,6 +372,10 @@ public abstract class RenderMethod {
 		GL20.glUniform1f(fovUniform, getFOV());
 		int aspectUniform = GL20.glGetUniformLocation(shader.getShaderProgram(), "aspect");
 		GL20.glUniform1f(aspectUniform, (float)Display.getWidth() / (float)Display.getHeight());
+		int pitchUniform = GL20.glGetUniformLocation(shader.getShaderProgram(), "pitch");
+		GL20.glUniform1f(pitchUniform, pitch);
+		int rubixUniform = GL20.glGetUniformLocation(shader.getShaderProgram(), "rubix");
+		GL20.glUniform1i(rubixUniform, rubix ? 1 : 0);
 
 		int backgroundUniform = GL20.glGetUniformLocation(shader.getShaderProgram(), "backgroundColor");
 		float backgroundColor[] = getBackgroundColor();
@@ -412,6 +417,7 @@ public abstract class RenderMethod {
 	public void addButtonsToGui(List<GuiButton> buttonList, int width, int height) {
 		buttonList.add(new GuiButton(18101, width / 2 - 155, height / 6 + 48, 150, 20, "Resize Gui: " + (resizeGui ? "ON" : "OFF")));
 		buttonList.add(new Slider(new Responder(), 18102, width / 2 + 5, height / 6 + 48, 150, 20, "Quality", 0.1f, 5f, quality, 0.1f, null));
+		buttonList.add(new GuiButton(18103, width / 2 - 155, height / 6 + 78, 150, 20, "Rubix: " + (rubix ? "ON" : "OFF")));
 	}
 
 	public void onButtonPress(GuiButton button) {
@@ -419,6 +425,9 @@ public abstract class RenderMethod {
 		if (button.id == 18101) {
 			resizeGui = !resizeGui;
 			button.displayString = "Resize Gui: " + (resizeGui ? "ON" : "OFF");
+		} else if (button.id == 18103) {
+			rubix = !rubix;
+			button.displayString = "Rubix: " + (rubix ? "ON" : "OFF");
 		}
 	}
 

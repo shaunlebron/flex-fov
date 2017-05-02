@@ -21,6 +21,9 @@ uniform vec2 pixelOffset[4];
 //fovx
 uniform float fovx;
 uniform float aspect;
+uniform float pitch;
+
+uniform int rubix;
 
 uniform vec2 cursorPos;
 
@@ -140,7 +143,16 @@ vec3 stereographic_ray(vec2 lenscoord) {
   return stereographic_inverse(lenscoord * scale);
 }
 
+
+// Use panini when looking straight, and stereographic when looking down
+vec3 hybrid_stereo_ray(vec2 c) {
+  return mix(panini_ray(c), stereographic_ray(c), abs(pitch) / 90);
+}
+
 vec4 rubix_color(vec2 coord, vec3 hue) {
+  if (rubix == 0) {
+    return vec4(0,0,0,0);
+  }
   int numCells = 10;
   int cellSize = 4;
   int padSize = 1;
@@ -207,11 +219,11 @@ vec3 tex_to_ray(vec2 texcoord) {
   if (fovx < 120) {
     ray = standard_ray(c);
   } else if (fovx < 140) {
-    ray = mix(standard_ray(c), stereographic_ray(c), (fovx - 120)/ 20.0);
+    ray = mix(standard_ray(c), hybrid_stereo_ray(c), (fovx - 120)/ 20.0);
   } else if (fovx < 200) {
-    ray = stereographic_ray(c);
+    ray = hybrid_stereo_ray(c);
   } else if (fovx < 220) {
-    ray = mix(stereographic_ray(c), mercator_ray(c), (fovx - 200)/ 20.0);
+    ray = mix(hybrid_stereo_ray(c), mercator_ray(c), (fovx - 200)/ 20.0);
   } else if (fovx < 340) {
     ray = mercator_ray(c);
   } else if (fovx < 360) {
