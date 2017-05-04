@@ -22,15 +22,15 @@ import net.minecraft.client.shader.Framebuffer;
 import net.minecraft.entity.Entity;
 
 public class RenderUtil {
-	
+
 	/**Enables or disables 360 degree rendering.*/
 	public static boolean render360 = true;
-	
+
 	/**The current render method.*/
 	public static RenderMethod renderMethod = new Standard();
 	/**The index of the current render method.*/
 	public static int index = 0;
-	
+
 	/**Used to check if the screen was resized.*/
 	private static int width = 0;
 	/**Used to check if the screen was resized.*/
@@ -38,23 +38,23 @@ public class RenderUtil {
 	/**Used for rendering multiple times*/ //TODO remove
 	public static int partialWidth = 0;
 	public static int partialHeight = 0;
-	
+
 	public static float rotation = 0;
-	
+
 	/**The 360 degree shader.*/
 	private static Shader shader = null;
 	/**The secondary framebuffer used to render the world in 360 degrees.*/
 	private static Framebuffer framebuffer = null;
 	private static int[] framebufferTextures = new int[6];
-	
+
 	/**Reload the framebuffer and shader.*/
 	private static boolean forceReload = false;
-	
+
 	/**Reload the framebuffer and shader.*/
 	public static void forceReload() {
 		forceReload = true;
 	}
-	
+
 	/**
 	 * Checks if shader exists before creating it.
 	 */
@@ -66,7 +66,7 @@ public class RenderUtil {
 			CLTLog.info("Attemped to re-create existing shader");
 		}
 	}
-	
+
 	/**
 	 * Checks to see if the shader exists before deleting it.
 	 */
@@ -78,7 +78,7 @@ public class RenderUtil {
 			CLTLog.info("Attemped to delete non-existent shader");
 		}
 	}
-	
+
 	/**
 	 * Create or delete shader and secondary framebuffer.<br>
 	 * Called from asm modified code on world load and unload.
@@ -132,7 +132,7 @@ public class RenderUtil {
 	 * @param finishTimeNano
 	 */
 	public static void setupRenderWorld(EntityRenderer er, Minecraft mc, float partialTicks, long finishTimeNano) {
-		
+
 		//reload the framebuffer and shader
 		if (forceReload || width != mc.displayWidth || height != mc.displayHeight) {
 			forceReload = false;
@@ -164,20 +164,27 @@ public class RenderUtil {
 			}
 			GlStateManager.bindTexture(0);
 		}
-		
+
 		renderMethod.renderWorld(er, mc, framebuffer, shader, framebufferTextures, partialTicks, finishTimeNano, width, height, renderMethod.getQuality());
 	}
-	
+
 	/**
 	 * Called from asm modified code
 	 * {@link net.minecraft.client.renderer.EntityRenderer#orientCamera(float) orientCamera}
 	 */
 	public static void rotateCamera() {
-		//GlStateManager.rotate(renderMethod.getRotateY(), 0, 1, 0);
-		//GlStateManager.rotate(renderMethod.getRotateX(), 1, 0, 0);
+		GlStateManager.rotate(renderMethod.getRotateY(), 0, 1, 0);
+		GlStateManager.rotate(renderMethod.getRotateX(), 1, 0, 0);
 		//GlStateManager.translate(-RenderMethod.testZ, 0, RenderMethod.testZ);
+
+		if (renderMethod.player != null) {
+			renderMethod.player.rotationYaw = renderMethod.playerYaw;
+			renderMethod.player.prevRotationYaw = renderMethod.playerPrevYaw;
+			renderMethod.player.rotationPitch = renderMethod.playerPitch;
+			renderMethod.player.prevRotationPitch = renderMethod.playerPrevPitch;
+		}
 	}
-	
+
 	/**
 	 * Called from asm modified code
 	 * {@link net.minecraft.client.renderer.EntityRenderer#updateCameraAndRender(float, long) updateCameraAndRender}
@@ -191,7 +198,7 @@ public class RenderUtil {
 			GlStateManager.bindTexture(0);
 		}
 	}
-	
+
 	/**
 	 * Called from asm modified code
 	 * {@link net.minecraft.client.renderer.EntityRenderer#updateCameraAndRender(float, long) updateCameraAndRender}
@@ -220,7 +227,7 @@ public class RenderUtil {
 			}
 		}
 	}
-	
+
 	/**
 	 * Called from asm modified code
 	 * {@link net.minecraft.client.renderer.EntityRenderer#updateCameraAndRender(float, long) updateCameraAndRender}
@@ -234,7 +241,7 @@ public class RenderUtil {
 			}
 		}
 	}
-	
+
 	/**
 	 * Called from asm modified code
 	 * {@link net.minecraft.client.renderer.EntityRenderer#updateCameraAndRender(float, long) updateCameraAndRender}
@@ -249,7 +256,7 @@ public class RenderUtil {
 			}
 		}
 	}
-	
+
 	/**
 	 * Called from asm modified code
 	 * {@link net.minecraft.client.renderer.EntityRenderer#drawNameplate(float, long) drawNameplate}
@@ -261,7 +268,7 @@ public class RenderUtil {
 		}
 		return yaw;
 	}
-	
+
 	/**
 	 * Called from asm modified code
 	 * {@link net.minecraft.client.renderer.EntityRenderer#drawNameplate(float, long) drawNameplate}

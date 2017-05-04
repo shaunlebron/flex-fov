@@ -47,6 +47,12 @@ public abstract class RenderMethod {
 	private float rotateX;
 	private float rotateY;
 
+	public Entity player;
+	public float playerYaw;
+	public float playerPitch;
+	public float playerPrevYaw;
+	public float playerPrevPitch;
+
 	static {
 		//Put all of the render methods here
 		renderMethods = new RenderMethod[] {
@@ -209,7 +215,7 @@ public abstract class RenderMethod {
 	public void renderWorld(EntityRenderer er, Minecraft mc, Framebuffer framebuffer, Shader shader,
 			int[] framebufferTextures, float partialTicks, long finishTimeNano, int width, int height, float sizeIncrease) {
 		//save the players state
-		Entity player = mc.getRenderViewEntity();
+		player = mc.getRenderViewEntity();
 		yaw = player.rotationYaw;
 		pitch = player.rotationPitch;
 		prevYaw = player.prevRotationYaw;
@@ -243,12 +249,6 @@ public abstract class RenderMethod {
 			}
 		}
 
-		//reset the players state
-		player.rotationYaw = yaw;
-		player.rotationPitch = pitch;
-		player.prevRotationYaw = prevYaw;
-		player.prevRotationPitch = prevPitch;
-
 		//reset displayWidth and displayHeight to the primary framebuffer dimensions
 		mc.displayWidth = width;
 		mc.displayHeight = height;
@@ -266,71 +266,96 @@ public abstract class RenderMethod {
 		}
 	}
 
+	private void resetPlayerView(float yaw, float pitch, float prevYaw, float prevPitch) {
+		player.rotationYaw = yaw;
+		player.rotationPitch = pitch;
+		player.prevRotationYaw = prevYaw;
+		player.prevRotationPitch = prevPitch;
+	}
+
 	protected void renderFront(EntityRenderer er, Minecraft mc, float partialTicks, long finishTimeNano,
 			Entity player, int framebufferTexture, float yaw, float pitch, float prevYaw, float prevPitch) {
 		OpenGlHelper.glFramebufferTexture2D(OpenGlHelper.GL_FRAMEBUFFER, OpenGlHelper.GL_COLOR_ATTACHMENT0, GL11.GL_TEXTURE_2D, framebufferTexture, 0);
 		GlStateManager.bindTexture(0);
 		//rotate the player and render
+		rotateX = 0;
+		rotateY = 0;
+		playerYaw = yaw;
+		playerPitch = pitch;
+		playerPrevYaw = prevYaw;
+		playerPrevPitch = prevPitch;
 		er.renderWorldPass(2, partialTicks, finishTimeNano);
+		resetPlayerView(yaw,pitch,prevYaw,prevPitch);
 	}
 
 	protected void renderLeft(EntityRenderer er, Minecraft mc, float partialTicks, long finishTimeNano,
 			Entity player, int framebufferTexture, float yaw, float pitch, float prevYaw, float prevPitch) {
 		OpenGlHelper.glFramebufferTexture2D(OpenGlHelper.GL_FRAMEBUFFER, OpenGlHelper.GL_COLOR_ATTACHMENT0, GL11.GL_TEXTURE_2D, framebufferTexture, 0);
 		GlStateManager.bindTexture(0);
-		player.rotationYaw = yaw - 90;
-		player.prevRotationYaw = prevYaw - 90;
-		player.rotationPitch = 0;
-		player.prevRotationPitch = 0;
-		RenderUtil.rotation = pitch;
+		rotateX = 0;
+		rotateY = -90;
+		playerYaw = yaw - 90;
+		playerPrevYaw = prevYaw - 90;
+		playerPitch = pitch;
+		playerPrevPitch = prevPitch;
 		er.renderWorldPass(2, partialTicks, finishTimeNano);
-		RenderUtil.rotation = 0;
+		resetPlayerView(yaw,pitch,prevYaw,prevPitch);
 	}
 
 	protected void renderRight(EntityRenderer er, Minecraft mc, float partialTicks, long finishTimeNano,
 			Entity player, int framebufferTexture, float yaw, float pitch, float prevYaw, float prevPitch) {
 		OpenGlHelper.glFramebufferTexture2D(OpenGlHelper.GL_FRAMEBUFFER, OpenGlHelper.GL_COLOR_ATTACHMENT0, GL11.GL_TEXTURE_2D, framebufferTexture, 0);
 		GlStateManager.bindTexture(0);
-		player.rotationYaw = yaw + 90;
-		player.prevRotationYaw = prevYaw + 90;
-		player.rotationPitch = 0;
-		player.prevRotationPitch = 0;
-		RenderUtil.rotation = -pitch;
+		rotateX = 0;
+		rotateY = 90;
+		playerYaw = yaw + 90;
+		playerPrevYaw = prevYaw + 90;
+		playerPitch = pitch;
+		playerPrevPitch = prevPitch;
 		er.renderWorldPass(2, partialTicks, finishTimeNano);
-		RenderUtil.rotation = 0;
+		resetPlayerView(yaw,pitch,prevYaw,prevPitch);
 	}
 
 	protected void renderTop(EntityRenderer er, Minecraft mc, float partialTicks, long finishTimeNano,
 			Entity player, int framebufferTexture, float yaw, float pitch, float prevYaw, float prevPitch) {
 		OpenGlHelper.glFramebufferTexture2D(OpenGlHelper.GL_FRAMEBUFFER, OpenGlHelper.GL_COLOR_ATTACHMENT0, GL11.GL_TEXTURE_2D, framebufferTexture, 0);
 		GlStateManager.bindTexture(0);
-		player.rotationYaw = yaw;
-		player.prevRotationYaw = prevYaw;
-		player.rotationPitch = pitch - 90;
-		player.prevRotationPitch = prevPitch - 90;
+		rotateX = -90;
+		rotateY = 0;
+		playerYaw = yaw;
+		playerPrevYaw = prevYaw;
+		playerPitch = pitch - 90;
+		playerPrevPitch = prevPitch - 90;
 		er.renderWorldPass(2, partialTicks, finishTimeNano);
+		resetPlayerView(yaw,pitch,prevYaw,prevPitch);
 	}
 
 	protected void renderBottom(EntityRenderer er, Minecraft mc, float partialTicks, long finishTimeNano,
 			Entity player, int framebufferTexture, float yaw, float pitch, float prevYaw, float prevPitch) {
 		OpenGlHelper.glFramebufferTexture2D(OpenGlHelper.GL_FRAMEBUFFER, OpenGlHelper.GL_COLOR_ATTACHMENT0, GL11.GL_TEXTURE_2D, framebufferTexture, 0);
 		GlStateManager.bindTexture(0);
-		player.rotationYaw = yaw;
-		player.prevRotationYaw = prevYaw;
-		player.rotationPitch = pitch + 90;
-		player.prevRotationPitch = prevPitch + 90;
+		rotateX = 90;
+		rotateY = 0;
+		playerYaw = yaw;
+		playerPrevYaw = prevYaw;
+		playerPitch = pitch + 90;
+		playerPrevPitch = prevPitch + 90;
 		er.renderWorldPass(2, partialTicks, finishTimeNano);
+		resetPlayerView(yaw,pitch,prevYaw,prevPitch);
 	}
 
 	protected void renderBack(EntityRenderer er, Minecraft mc, float partialTicks, long finishTimeNano,
 			Entity player, int framebufferTexture, float yaw, float pitch, float prevYaw, float prevPitch) {
 		OpenGlHelper.glFramebufferTexture2D(OpenGlHelper.GL_FRAMEBUFFER, OpenGlHelper.GL_COLOR_ATTACHMENT0, GL11.GL_TEXTURE_2D, framebufferTexture, 0);
 		GlStateManager.bindTexture(0);
-		player.rotationYaw = yaw + 180;
-		player.prevRotationYaw = prevYaw + 180;
-		player.rotationPitch = -pitch;
-		player.prevRotationPitch = -prevPitch;
+		rotateX = 0;
+		rotateY = 0;
+		playerYaw = yaw + 180;
+		playerPrevYaw = prevYaw + 180;
+		playerPitch = -pitch;
+		playerPrevPitch = -prevPitch;
 		er.renderWorldPass(2, partialTicks, finishTimeNano);
+		resetPlayerView(yaw,pitch,prevYaw,prevPitch);
 	}
 
 	public void runShader(EntityRenderer er, Minecraft mc, Framebuffer framebuffer,
