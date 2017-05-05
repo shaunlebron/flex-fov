@@ -182,9 +182,11 @@ public class RenderUtil {
 		// GlStateManager.translate(-RenderMethod.testZ, 0, RenderMethod.testZ);
 
 		// Full camera control example: facing right
-		// new x-axis   y-axis   z-axis
 		// FloatBuffer f = BUF_FLOAT_16;
 		// f.clear();
+		//
+		// each new axis is specified as a column here:
+		// x-axis    y-axis    z-axis
 		// f.put(0); f.put(0); f.put(-1); f.put(0);
 		// f.put(0); f.put(1); f.put(0); f.put(0);
 		// f.put(1); f.put(0); f.put(0); f.put(0);
