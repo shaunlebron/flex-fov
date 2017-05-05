@@ -100,40 +100,28 @@ public class EntityRendererTransformer extends ClassTransformer {
 
 			public void transform(ClassNode classNode, MethodNode method, boolean obfuscated) {
 				CLTLog.info("Found method: " + method.name + " " + method.desc);
+				int count = 0;
+				AbstractInsnNode hook = null;
 				for (AbstractInsnNode instruction : method.instructions.toArray()) {
-					if (instruction.getOpcode() == TABLESWITCH) {
-						CLTLog.info("Found tableswitch in method " + getMethodName());
-
-						//Go back to orientCamera
-						for (int i = 0; i < 10; i++) {
-							instruction = instruction.getPrevious();
-							// CLTLog.info("i=-"+i+" : "+instruction);
+					if (instruction instanceof MethodInsnNode) {
+						MethodInsnNode methodCall = (MethodInsnNode)instruction;
+						if (methodCall.name.equals("loadIdentity")) {
+							count++;
+							CLTLog.info("found loadIdentity "+count);
 						}
-						//RenderUtil.rotateCamera()
-						method.instructions.insert(instruction, new MethodInsnNode(INVOKESTATIC,
-								Type.getInternalName(RenderUtil.class), "rotateCamera", "()V", false));
-
-						// InsnList toInsert = new InsnList();
-						// //GlStateManager.rotate(RenderUtil.rotation, 0, 0, 1);
-						// toInsert.add(new FieldInsnNode(GETSTATIC, Type.getInternalName(RenderUtil.class), "rotation", "F")); //rotation
-						// toInsert.add(new InsnNode(FCONST_0)); //0
-						// toInsert.add(new InsnNode(FCONST_0)); //0
-						// toInsert.add(new InsnNode(FCONST_1)); //1
-						// toInsert.add(new MethodInsnNode(INVOKESTATIC, Type.getInternalName(GlStateManager.class),
-						// 		obfuscated ? "func_179114_b" : "rotate", "(FFFF)V", false));
-						//
-						// //Fixes screen tearing. FIXME move when MCP updates
-						// //GlStateManager.translate(0, 0, -0.05F);
-						// toInsert.add(new InsnNode(FCONST_0)); //0
-						// toInsert.add(new InsnNode(FCONST_0)); //0
-						// toInsert.add(new LdcInsnNode(-0.05f)); //-0.05
-						// toInsert.add(new MethodInsnNode(INVOKESTATIC, Type.getInternalName(GlStateManager.class),
-						// 		obfuscated ? "func_179109_b" : "translate", "(FFF)V", false));
-						//
-						// method.instructions.insertBefore(instruction, toInsert);
-
+					}
+					if (count == 2) {
+						hook = instruction;
 						break;
 					}
+				}
+
+				if (hook == null) {
+					CLTLog.info("could not find loadIdentity 2!");
+				} else {
+					//RenderUtil.rotateCamera()
+					method.instructions.insert(hook, new MethodInsnNode(INVOKESTATIC,
+							Type.getInternalName(RenderUtil.class), "rotateCamera", "()V", false));
 				}
 			}
 		};

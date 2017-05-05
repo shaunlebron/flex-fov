@@ -1,7 +1,9 @@
 package mod.render360.coretransform;
 
 import java.io.IOException;
+import java.nio.FloatBuffer;
 
+import org.lwjgl.BufferUtils;
 import org.lwjgl.input.Mouse;
 import org.lwjgl.opengl.Display;
 import org.lwjgl.opengl.GL11;
@@ -22,6 +24,8 @@ import net.minecraft.client.shader.Framebuffer;
 import net.minecraft.entity.Entity;
 
 public class RenderUtil {
+
+	private static final FloatBuffer BUF_FLOAT_16 = BufferUtils.createFloatBuffer(16);
 
 	/**Enables or disables 360 degree rendering.*/
 	public static boolean render360 = true;
@@ -173,15 +177,30 @@ public class RenderUtil {
 	 * {@link net.minecraft.client.renderer.EntityRenderer#orientCamera(float) orientCamera}
 	 */
 	public static void rotateCamera() {
-		GlStateManager.rotate(renderMethod.getRotateY(), 0, 1, 0);
-		GlStateManager.rotate(renderMethod.getRotateX(), 1, 0, 0);
-		//GlStateManager.translate(-RenderMethod.testZ, 0, RenderMethod.testZ);
+		// TODO: do this only if our mod is enabled to prevent messing up the original camera
 
+		// GlStateManager.rotate(90, 0, 1, 0);
+		// GlStateManager.rotate(renderMethod.getRotateX(), 1, 0, 0);
+		// GlStateManager.translate(-RenderMethod.testZ, 0, RenderMethod.testZ);
+
+		// Full camera control example: facing right
+		// new x-axis   y-axis   z-axis
+		// FloatBuffer f = BUF_FLOAT_16;
+		// f.clear();
+		// f.put(0); f.put(0); f.put(-1); f.put(0);
+		// f.put(0); f.put(1); f.put(0); f.put(0);
+		// f.put(1); f.put(0); f.put(0); f.put(0);
+		// f.put(0); f.put(0); f.put(0); f.put(1);
+		// f.rewind();
+		// GlStateManager.multMatrix(f);
+
+		// TODO: to prevent bad culling, we have to do this after orientCamera
+		// (if at all!  test without first)
 		if (renderMethod.player != null) {
-			renderMethod.player.rotationYaw = renderMethod.playerYaw;
-			renderMethod.player.prevRotationYaw = renderMethod.playerPrevYaw;
-			renderMethod.player.rotationPitch = renderMethod.playerPitch;
-			renderMethod.player.prevRotationPitch = renderMethod.playerPrevPitch;
+			// renderMethod.player.rotationYaw = renderMethod.playerYaw;
+			// renderMethod.player.prevRotationYaw = renderMethod.playerPrevYaw;
+			// renderMethod.player.rotationPitch = renderMethod.playerPitch;
+			// renderMethod.player.prevRotationPitch = renderMethod.playerPrevPitch;
 		}
 	}
 
