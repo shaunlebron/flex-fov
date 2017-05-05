@@ -174,13 +174,11 @@ public class RenderUtil {
 
 	/**
 	 * Called from asm modified code
-	 * {@link net.minecraft.client.renderer.EntityRenderer#orientCamera(float) orientCamera}
+	 * {@link net.minecraft.client.renderer.EntityRenderer#setupCameraTransform(float, int) setupCameraTransform}
 	 */
 	public static void rotateCamera() {
-		// TODO: do this only if our mod is enabled to prevent messing up the original camera
-
-		// GlStateManager.rotate(90, 0, 1, 0);
-		// GlStateManager.rotate(renderMethod.getRotateX(), 1, 0, 0);
+		GlStateManager.rotate(renderMethod.getRotateY(), 0, 1, 0);
+		GlStateManager.rotate(renderMethod.getRotateX(), 1, 0, 0);
 		// GlStateManager.translate(-RenderMethod.testZ, 0, RenderMethod.testZ);
 
 		// Full camera control example: facing right
@@ -193,14 +191,19 @@ public class RenderUtil {
 		// f.put(0); f.put(0); f.put(0); f.put(1);
 		// f.rewind();
 		// GlStateManager.multMatrix(f);
+	}
 
-		// TODO: to prevent bad culling, we have to do this after orientCamera
-		// (if at all!  test without first)
+	/**
+	 * Called from asm modified code
+	 * {@link net.minecraft.client.renderer.EntityRenderer#setupCameraTransform(float, int) setupCameraTransform}
+	 */
+	public static void rotatePlayer() {
+		// to prevent bad culling, we have to do this after orientCamera
 		if (renderMethod.player != null) {
-			// renderMethod.player.rotationYaw = renderMethod.playerYaw;
-			// renderMethod.player.prevRotationYaw = renderMethod.playerPrevYaw;
-			// renderMethod.player.rotationPitch = renderMethod.playerPitch;
-			// renderMethod.player.prevRotationPitch = renderMethod.playerPrevPitch;
+			renderMethod.player.rotationYaw = renderMethod.playerYaw;
+			renderMethod.player.prevRotationYaw = renderMethod.playerPrevYaw;
+			renderMethod.player.rotationPitch = renderMethod.playerPitch;
+			renderMethod.player.prevRotationPitch = renderMethod.playerPrevPitch;
 		}
 	}
 

@@ -118,11 +118,32 @@ public class EntityRendererTransformer extends ClassTransformer {
 
 				if (hook == null) {
 					CLTLog.info("could not find loadIdentity 2!");
-				} else {
-					//RenderUtil.rotateCamera()
-					method.instructions.insert(hook, new MethodInsnNode(INVOKESTATIC,
-							Type.getInternalName(RenderUtil.class), "rotateCamera", "()V", false));
+					return;
 				}
+				//RenderUtil.rotateCamera()
+				method.instructions.insert(hook, new MethodInsnNode(INVOKESTATIC,
+						Type.getInternalName(RenderUtil.class), "rotateCamera", "()V", false));
+
+				hook = null;
+				for (AbstractInsnNode instruction : method.instructions.toArray()) {
+					if (instruction instanceof MethodInsnNode) {
+						MethodInsnNode methodCall = (MethodInsnNode)instruction;
+						if (methodCall.name.equals("orientCamera")) {
+							hook = instruction;
+							CLTLog.info("found orientCamera");
+							break;
+						}
+					}
+				}
+
+				if (hook == null) {
+					CLTLog.info("could not find orientCamera!");
+					return;
+				}
+
+				//RenderUtil.rotatePlayer()
+				method.instructions.insert(hook, new MethodInsnNode(INVOKESTATIC,
+						Type.getInternalName(RenderUtil.class), "rotatePlayer", "()V", false));
 			}
 		};
 

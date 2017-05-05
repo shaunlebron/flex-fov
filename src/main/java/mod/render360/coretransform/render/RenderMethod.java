@@ -349,7 +349,7 @@ public abstract class RenderMethod {
 		OpenGlHelper.glFramebufferTexture2D(OpenGlHelper.GL_FRAMEBUFFER, OpenGlHelper.GL_COLOR_ATTACHMENT0, GL11.GL_TEXTURE_2D, framebufferTexture, 0);
 		GlStateManager.bindTexture(0);
 		rotateX = 0;
-		rotateY = 0;
+		rotateY = 180;
 		playerYaw = yaw + 180;
 		playerPrevYaw = prevYaw + 180;
 		playerPitch = -pitch;
