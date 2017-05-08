@@ -177,22 +177,16 @@ public class RenderUtil {
 	 * {@link net.minecraft.client.renderer.EntityRenderer#setupCameraTransform(float, int) setupCameraTransform}
 	 */
 	public static void rotateCamera() {
-		GlStateManager.rotate(renderMethod.getRotateY(), 0, 1, 0);
-		GlStateManager.rotate(renderMethod.getRotateX(), 1, 0, 0);
-		// GlStateManager.translate(-RenderMethod.testZ, 0, RenderMethod.testZ);
-
-		// Full camera control example: facing right
-		// FloatBuffer f = BUF_FLOAT_16;
-		// f.clear();
-		//
-		// each new axis is specified as a column here:
-		// x-axis    y-axis    z-axis
-		// f.put(0); f.put(0); f.put(-1); f.put(0);
-		// f.put(0); f.put(1); f.put(0); f.put(0);
-		// f.put(1); f.put(0); f.put(0); f.put(0);
-		// f.put(0); f.put(0); f.put(0); f.put(1);
-		// f.rewind();
-		// GlStateManager.multMatrix(f);
+		float[] coordFrame = renderMethod.coordFrame;
+		if (coordFrame != null) {
+			FloatBuffer f = BUF_FLOAT_16;
+			f.clear();
+			for (int i=0; i<16; i++) {
+				f.put(coordFrame[i]);
+			}
+			f.rewind();
+			GlStateManager.multMatrix(f);
+		}
 	}
 
 	/**
@@ -201,11 +195,14 @@ public class RenderUtil {
 	 */
 	public static void rotatePlayer() {
 		// to prevent bad culling, we have to do this after orientCamera
-		if (renderMethod.player != null) {
-			renderMethod.player.rotationYaw = renderMethod.playerYaw;
-			renderMethod.player.prevRotationYaw = renderMethod.playerPrevYaw;
-			renderMethod.player.rotationPitch = renderMethod.playerPitch;
-			renderMethod.player.prevRotationPitch = renderMethod.playerPrevPitch;
+		Entity player = renderMethod.player;
+		float deltaYaw = renderMethod.playerDeltaYaw;
+		float deltaPitch = renderMethod.playerDeltaPitch;
+		if (player != null) {
+			player.rotationYaw += deltaYaw;
+			player.prevRotationYaw += deltaYaw;
+			player.rotationPitch += deltaPitch;
+			player.prevRotationPitch += deltaPitch;
 		}
 	}
 

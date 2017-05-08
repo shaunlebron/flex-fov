@@ -44,14 +44,11 @@ public abstract class RenderMethod {
 	private float prevYaw;
 	private float prevPitch;
 
-	private float rotateX;
-	private float rotateY;
+	public float[] coordFrame;
 
 	public Entity player;
-	public float playerYaw;
-	public float playerPitch;
-	public float playerPrevYaw;
-	public float playerPrevPitch;
+	public float playerDeltaYaw;
+	public float playerDeltaPitch;
 
 	static {
 		//Put all of the render methods here
@@ -238,15 +235,31 @@ public abstract class RenderMethod {
 
 		RenderUtil.render360 = true;
 
-		renderFront(er, mc, partialTicks, finishTimeNano, player, framebufferTextures[0], yaw, pitch, prevYaw, prevPitch);
-		if (getFOV() >= 90) {
-			renderLeft(er, mc, partialTicks, finishTimeNano, player, framebufferTextures[2], yaw, pitch, prevYaw, prevPitch);
-			renderRight(er, mc, partialTicks, finishTimeNano, player, framebufferTextures[3], yaw, pitch, prevYaw, prevPitch);
-			renderTop(er, mc, partialTicks, finishTimeNano, player, framebufferTextures[4], yaw, pitch, prevYaw, prevPitch);
-			renderBottom(er, mc, partialTicks, finishTimeNano, player, framebufferTextures[5], yaw, pitch, prevYaw, prevPitch);
-			if (getFOV() >= 270) {
-				renderBack(er, mc, partialTicks, finishTimeNano, player, framebufferTextures[1], yaw, pitch, prevYaw, prevPitch);
-			}
+		for (int i=0; i<6; i++) {
+			// set camera/player rotation state (read by hooks at the correct moment)
+			coordFrame = Cube.coordFrames[i];
+
+			// the forward vector is the opposite direction of the z-axis
+			float x = -coordFrame[2];
+			float y = -coordFrame[6];
+			float z = -coordFrame[10];
+
+			// calculate the delta yaw/pitch to point the player
+			float lon = (float)Math.atan2(x, -z);
+			float lat = (float)Math.atan2(y, Math.sqrt(x*x+z*z));
+			playerDeltaYaw = lon;
+			playerDeltaPitch = lat;
+
+			// render to texture
+			OpenGlHelper.glFramebufferTexture2D(OpenGlHelper.GL_FRAMEBUFFER, OpenGlHelper.GL_COLOR_ATTACHMENT0, GL11.GL_TEXTURE_2D, framebufferTextures[i], 0);
+			GlStateManager.bindTexture(0);
+			er.renderWorldPass(2, partialTicks, finishTimeNano);
+
+			// reset player view
+			player.rotationYaw = yaw;
+			player.rotationPitch = pitch;
+			player.prevRotationYaw = prevYaw;
+			player.prevRotationPitch = prevPitch;
 		}
 
 		//reset displayWidth and displayHeight to the primary framebuffer dimensions
@@ -264,98 +277,6 @@ public abstract class RenderMethod {
 			GL20.glUniform1i(cursorUniform, 0);
 			runShader(er, mc, framebuffer, shader, framebufferTextures);
 		}
-	}
-
-	private void resetPlayerView(float yaw, float pitch, float prevYaw, float prevPitch) {
-		player.rotationYaw = yaw;
-		player.rotationPitch = pitch;
-		player.prevRotationYaw = prevYaw;
-		player.prevRotationPitch = prevPitch;
-	}
-
-	protected void renderFront(EntityRenderer er, Minecraft mc, float partialTicks, long finishTimeNano,
-			Entity player, int framebufferTexture, float yaw, float pitch, float prevYaw, float prevPitch) {
-		OpenGlHelper.glFramebufferTexture2D(OpenGlHelper.GL_FRAMEBUFFER, OpenGlHelper.GL_COLOR_ATTACHMENT0, GL11.GL_TEXTURE_2D, framebufferTexture, 0);
-		GlStateManager.bindTexture(0);
-		//rotate the player and render
-		rotateX = 0;
-		rotateY = 0;
-		playerYaw = yaw;
-		playerPitch = pitch;
-		playerPrevYaw = prevYaw;
-		playerPrevPitch = prevPitch;
-		er.renderWorldPass(2, partialTicks, finishTimeNano);
-		resetPlayerView(yaw,pitch,prevYaw,prevPitch);
-	}
-
-	protected void renderLeft(EntityRenderer er, Minecraft mc, float partialTicks, long finishTimeNano,
-			Entity player, int framebufferTexture, float yaw, float pitch, float prevYaw, float prevPitch) {
-		OpenGlHelper.glFramebufferTexture2D(OpenGlHelper.GL_FRAMEBUFFER, OpenGlHelper.GL_COLOR_ATTACHMENT0, GL11.GL_TEXTURE_2D, framebufferTexture, 0);
-		GlStateManager.bindTexture(0);
-		rotateX = 0;
-		rotateY = -90;
-		playerYaw = yaw - 90;
-		playerPrevYaw = prevYaw - 90;
-		playerPitch = pitch;
-		playerPrevPitch = prevPitch;
-		er.renderWorldPass(2, partialTicks, finishTimeNano);
-		resetPlayerView(yaw,pitch,prevYaw,prevPitch);
-	}
-
-	protected void renderRight(EntityRenderer er, Minecraft mc, float partialTicks, long finishTimeNano,
-			Entity player, int framebufferTexture, float yaw, float pitch, float prevYaw, float prevPitch) {
-		OpenGlHelper.glFramebufferTexture2D(OpenGlHelper.GL_FRAMEBUFFER, OpenGlHelper.GL_COLOR_ATTACHMENT0, GL11.GL_TEXTURE_2D, framebufferTexture, 0);
-		GlStateManager.bindTexture(0);
-		rotateX = 0;
-		rotateY = 90;
-		playerYaw = yaw + 90;
-		playerPrevYaw = prevYaw + 90;
-		playerPitch = pitch;
-		playerPrevPitch = prevPitch;
-		er.renderWorldPass(2, partialTicks, finishTimeNano);
-		resetPlayerView(yaw,pitch,prevYaw,prevPitch);
-	}
-
-	protected void renderTop(EntityRenderer er, Minecraft mc, float partialTicks, long finishTimeNano,
-			Entity player, int framebufferTexture, float yaw, float pitch, float prevYaw, float prevPitch) {
-		OpenGlHelper.glFramebufferTexture2D(OpenGlHelper.GL_FRAMEBUFFER, OpenGlHelper.GL_COLOR_ATTACHMENT0, GL11.GL_TEXTURE_2D, framebufferTexture, 0);
-		GlStateManager.bindTexture(0);
-		rotateX = -90;
-		rotateY = 0;
-		playerYaw = yaw;
-		playerPrevYaw = prevYaw;
-		playerPitch = pitch - 90;
-		playerPrevPitch = prevPitch - 90;
-		er.renderWorldPass(2, partialTicks, finishTimeNano);
-		resetPlayerView(yaw,pitch,prevYaw,prevPitch);
-	}
-
-	protected void renderBottom(EntityRenderer er, Minecraft mc, float partialTicks, long finishTimeNano,
-			Entity player, int framebufferTexture, float yaw, float pitch, float prevYaw, float prevPitch) {
-		OpenGlHelper.glFramebufferTexture2D(OpenGlHelper.GL_FRAMEBUFFER, OpenGlHelper.GL_COLOR_ATTACHMENT0, GL11.GL_TEXTURE_2D, framebufferTexture, 0);
-		GlStateManager.bindTexture(0);
-		rotateX = 90;
-		rotateY = 0;
-		playerYaw = yaw;
-		playerPrevYaw = prevYaw;
-		playerPitch = pitch + 90;
-		playerPrevPitch = prevPitch + 90;
-		er.renderWorldPass(2, partialTicks, finishTimeNano);
-		resetPlayerView(yaw,pitch,prevYaw,prevPitch);
-	}
-
-	protected void renderBack(EntityRenderer er, Minecraft mc, float partialTicks, long finishTimeNano,
-			Entity player, int framebufferTexture, float yaw, float pitch, float prevYaw, float prevPitch) {
-		OpenGlHelper.glFramebufferTexture2D(OpenGlHelper.GL_FRAMEBUFFER, OpenGlHelper.GL_COLOR_ATTACHMENT0, GL11.GL_TEXTURE_2D, framebufferTexture, 0);
-		GlStateManager.bindTexture(0);
-		rotateX = 0;
-		rotateY = 180;
-		playerYaw = yaw + 180;
-		playerPrevYaw = prevYaw + 180;
-		playerPitch = -pitch;
-		playerPrevPitch = -prevPitch;
-		er.renderWorldPass(2, partialTicks, finishTimeNano);
-		resetPlayerView(yaw,pitch,prevYaw,prevPitch);
 	}
 
 	public void runShader(EntityRenderer er, Minecraft mc, Framebuffer framebuffer,
@@ -446,7 +367,7 @@ public abstract class RenderMethod {
 		buttonList.add(new GuiButton(18101, width / 2 - 155, height / 6 + 48, 150, 20, "Resize Gui: " + (resizeGui ? "ON" : "OFF")));
 		buttonList.add(new Slider(new Responder(), 18102, width / 2 + 5, height / 6 + 48, 150, 20, "Quality", 0.1f, 5f, quality, 0.1f, null));
 		buttonList.add(new GuiButton(18103, width / 2 - 155, height / 6 + 78, 150, 20, "Rubix: " + (rubix ? "ON" : "OFF")));
-		buttonList.add(new GuiButton(18104, width / 2 - 155, height / 6 + 108, 150, 20, "Split Compare: " + (split ? "ON" : "OFF")));
+		buttonList.add(new GuiButton(18105, width / 2 - 155, height / 6 + 108, 150, 20, "Split Compare: " + (split ? "ON" : "OFF")));
 	}
 
 	public void onButtonPress(GuiButton button) {
@@ -457,7 +378,7 @@ public abstract class RenderMethod {
 		} else if (button.id == 18103) {
 			rubix = !rubix;
 			button.displayString = "Rubix: " + (rubix ? "ON" : "OFF");
-		} else if (button.id == 18104) {
+		} else if (button.id == 18105) {
 			split = !split;
 			button.displayString = "Split Compare: " + (split ? "ON" : "OFF");
 		}
@@ -477,14 +398,6 @@ public abstract class RenderMethod {
 
 	public float getPrevPitch() {
 		return prevPitch;
-	}
-
-	public float getRotateX() {
-		return rotateX;
-	}
-
-	public float getRotateY() {
-		return rotateY;
 	}
 
 	public float getFOV() {
