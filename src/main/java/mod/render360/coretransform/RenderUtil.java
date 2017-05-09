@@ -244,7 +244,7 @@ public class RenderUtil {
 			GlStateManager.viewport(0, 0, mc.displayWidth, mc.displayHeight);
 			//if not in menu or inventory
 			if (mc.currentScreen == null) {
-				renderMethod.runShader(mc.entityRenderer, mc, framebuffer, shader, framebufferTextures);
+				renderMethod.runShader(mc, shader, framebufferTextures);
 			}
 		}
 	}
@@ -273,7 +273,7 @@ public class RenderUtil {
 			if (mc.theWorld != null) {
 				mc.getFramebuffer().bindFramebuffer(false);
 				GlStateManager.viewport(0, 0, mc.displayWidth, mc.displayHeight);
-				renderMethod.runShader(mc.entityRenderer, mc, framebuffer, shader, framebufferTextures);
+				renderMethod.runShader(mc, shader, framebufferTextures);
 			}
 		}
 	}

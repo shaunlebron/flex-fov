@@ -133,69 +133,16 @@ public abstract class RenderMethod {
 		Shader shader = new Shader();
 		shader.createShaderProgram(this);
 
-		GL20.glUseProgram(shader.getShaderProgram());
-
-		//Setup view
-		GL11.glMatrixMode(GL11.GL_PROJECTION);
-		GL11.glPushMatrix();
-		GL11.glLoadIdentity();
-		GL11.glOrtho(-1, 1, -1, 1, -1, 1);
-		GL11.glMatrixMode(GL11.GL_MODELVIEW);
-		GL11.glPushMatrix();
-		GL11.glLoadIdentity();
-
-		//Anti-aliasing
-		int pixelOffsetUniform = GL20.glGetUniformLocation(shader.getShaderProgram(), "pixelOffset[0]");
-		GL20.glUniform2f(pixelOffsetUniform, -0.25f/mc.displayWidth, -0.25f/mc.displayHeight);
-		pixelOffsetUniform = GL20.glGetUniformLocation(shader.getShaderProgram(), "pixelOffset[1]");
-		GL20.glUniform2f(pixelOffsetUniform, 0.25f/mc.displayWidth, -0.25f/mc.displayHeight);
-		pixelOffsetUniform = GL20.glGetUniformLocation(shader.getShaderProgram(), "pixelOffset[2]");
-		GL20.glUniform2f(pixelOffsetUniform, -0.25f/mc.displayWidth, 0.25f/mc.displayHeight);
-		pixelOffsetUniform = GL20.glGetUniformLocation(shader.getShaderProgram(), "pixelOffset[3]");
-		GL20.glUniform2f(pixelOffsetUniform, 0.25f/mc.displayWidth, 0.25f/mc.displayHeight);
-
-		int texFrontUniform = GL20.glGetUniformLocation(shader.getShaderProgram(), "texFront");
-		GL20.glUniform1i(texFrontUniform, 0);
-		int texBackUniform = GL20.glGetUniformLocation(shader.getShaderProgram(), "texBack");
-		GL20.glUniform1i(texBackUniform, 1);
-		int texLeftUniform = GL20.glGetUniformLocation(shader.getShaderProgram(), "texLeft");
-		GL20.glUniform1i(texLeftUniform, 2);
-		int texRightUniform = GL20.glGetUniformLocation(shader.getShaderProgram(), "texRight");
-		GL20.glUniform1i(texRightUniform, 3);
-		int texTopUniform = GL20.glGetUniformLocation(shader.getShaderProgram(), "texTop");
-		GL20.glUniform1i(texTopUniform, 4);
-		int texBottomUniform = GL20.glGetUniformLocation(shader.getShaderProgram(), "texBottom");
-		GL20.glUniform1i(texBottomUniform, 5);
-		int fovUniform = GL20.glGetUniformLocation(shader.getShaderProgram(), "fovx");
-		GL20.glUniform1f(fovUniform, getFOV());
-		int aspectUniform = GL20.glGetUniformLocation(shader.getShaderProgram(), "aspect");
-		GL20.glUniform1f(aspectUniform, (float)Display.getWidth() / (float)Display.getHeight());
-		int backgroundUniform = GL20.glGetUniformLocation(shader.getShaderProgram(), "backgroundColor");
-		GL20.glUniform4f(backgroundUniform, 0, 0, 0, 1);
-
-		GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, shader.getVbo());
-		GL20.glEnableVertexAttribArray(0);
-		GL20.glVertexAttribPointer(0, 2, GL11.GL_BYTE, false, 0, 0L);
-		for (int i = 0; i < 6; i++) {
-			GL13.glActiveTexture(GL13.GL_TEXTURE0+i);
-			GL11.glBindTexture(GL11.GL_TEXTURE_2D, framebuffer.framebufferTexture);
-		}
-		GL11.glDrawArrays(GL11.GL_TRIANGLES, 0, 6);
-		GL11.glBindTexture(GL11.GL_TEXTURE_2D, 0);
-		GL20.glDisableVertexAttribArray(0);
-		GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, 0);
-
-		//Reset view
-		GL11.glMatrixMode(GL11.GL_PROJECTION);
-		GL11.glPopMatrix();
-		GL11.glMatrixMode(GL11.GL_MODELVIEW);
-		GL11.glPopMatrix();
-
-		//unbind textures
-		for (int i = 5; i >= 0; i--) {
-			GL13.glActiveTexture(GL13.GL_TEXTURE0+i);
-			GL11.glBindTexture(GL11.GL_TEXTURE_2D, 0);
-		}
+		// clone frame buffers to simulate 3d view in loading screen?
+		int[] frameBufferTextures = new int[] {
+			framebuffer.framebufferTexture,
+			framebuffer.framebufferTexture,
+			framebuffer.framebufferTexture,
+			framebuffer.framebufferTexture,
+			framebuffer.framebufferTexture,
+			framebuffer.framebufferTexture
+		};
+		runShader(mc, shader, frameBufferTextures);
 
 		//Unbind shader
 		GL20.glUseProgram(0);
@@ -275,12 +222,11 @@ public abstract class RenderMethod {
 			GL20.glUseProgram(shader.getShaderProgram());
 			int cursorUniform = GL20.glGetUniformLocation(shader.getShaderProgram(), "drawCursor");
 			GL20.glUniform1i(cursorUniform, 0);
-			runShader(er, mc, framebuffer, shader, framebufferTextures);
+			runShader(mc, shader, framebufferTextures);
 		}
 	}
 
-	public void runShader(EntityRenderer er, Minecraft mc, Framebuffer framebuffer,
-			Shader shader, int[] framebufferTextures) {
+	public void runShader(Minecraft mc, Shader shader, int[] framebufferTextures) {
 		//Use shader
 		GL20.glUseProgram(shader.getShaderProgram());
 
@@ -303,18 +249,11 @@ public abstract class RenderMethod {
 		pixelOffsetUniform = GL20.glGetUniformLocation(shader.getShaderProgram(), "pixelOffset[3]");
 		GL20.glUniform2f(pixelOffsetUniform, 0.25f/mc.displayWidth, 0.25f/mc.displayHeight);
 
-		int texFrontUniform = GL20.glGetUniformLocation(shader.getShaderProgram(), "texFront");
-		GL20.glUniform1i(texFrontUniform, 0);
-		int texBackUniform = GL20.glGetUniformLocation(shader.getShaderProgram(), "texBack");
-		GL20.glUniform1i(texBackUniform, 1);
-		int texLeftUniform = GL20.glGetUniformLocation(shader.getShaderProgram(), "texLeft");
-		GL20.glUniform1i(texLeftUniform, 2);
-		int texRightUniform = GL20.glGetUniformLocation(shader.getShaderProgram(), "texRight");
-		GL20.glUniform1i(texRightUniform, 3);
-		int texTopUniform = GL20.glGetUniformLocation(shader.getShaderProgram(), "texTop");
-		GL20.glUniform1i(texTopUniform, 4);
-		int texBottomUniform = GL20.glGetUniformLocation(shader.getShaderProgram(), "texBottom");
-		GL20.glUniform1i(texBottomUniform, 5);
+		for (int i=0; i<6; i++) {
+			int textureUniform = GL20.glGetUniformLocation(shader.getShaderProgram(), "textures["+i+"]");
+			GL20.glUniform1i(textureUniform, i);
+		}
+
 		int fovUniform = GL20.glGetUniformLocation(shader.getShaderProgram(), "fovx");
 		GL20.glUniform1f(fovUniform, getFOV());
 		int aspectUniform = GL20.glGetUniformLocation(shader.getShaderProgram(), "aspect");

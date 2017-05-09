@@ -9,12 +9,7 @@
 in vec2 texcoord;
 
 /* The 6 textures to be rendered */
-uniform sampler2D texFront;
-uniform sampler2D texBack;
-uniform sampler2D texLeft;
-uniform sampler2D texRight;
-uniform sampler2D texTop;
-uniform sampler2D texBottom;
+uniform sampler2D textures[6];
 
 uniform vec2 pixelOffset[4];
 
@@ -193,29 +188,37 @@ vec4 ray_to_color(vec3 ray) {
   if (abs(ray.x) > abs(ray.y)) {
     if (abs(ray.x) > abs(ray.z)) {
       if (ray.x > 0) {
-        return texcoord_color(texRight, vec3(0,0,1), vec2(ray.z/ray.x, ray.y/ray.x));
+        // right
+        return texcoord_color(textures[3], vec3(0,0,1), vec2(ray.z/ray.x, ray.y/ray.x));
       } else {
-        return texcoord_color(texLeft, vec3(1,0,0), vec2(ray.z/ray.x, -ray.y/ray.x));
+        // left
+        return texcoord_color(textures[2], vec3(1,0,0), vec2(ray.z/ray.x, -ray.y/ray.x));
       }
     } else {
       if (ray.z > 0) {
-        return texcoord_color(texBack, vec3(1,1,0), vec2(-ray.x/ray.z, ray.y/ray.z));
+        // back
+        return texcoord_color(textures[1], vec3(1,1,0), vec2(-ray.x/ray.z, ray.y/ray.z));
       } else {
-        return texcoord_color(texFront, vec3(1,1,1), vec2(-ray.x/ray.z, -ray.y/ray.z));
+        // front
+        return texcoord_color(textures[0], vec3(1,1,1), vec2(-ray.x/ray.z, -ray.y/ray.z));
       }
     }
   } else {
     if (abs(ray.y) > abs(ray.z)) {
       if (ray.y > 0) {
-        return texcoord_color(texTop, vec3(1,0,1), vec2(ray.x/ray.y, ray.z/ray.y));
+        // top
+        return texcoord_color(textures[4], vec3(1,0,1), vec2(ray.x/ray.y, ray.z/ray.y));
       } else {
-        return texcoord_color(texBottom, vec3(0,1,1), vec2(-ray.x/ray.y, ray.z/ray.y));
+        // bottom
+        return texcoord_color(textures[5], vec3(0,1,1), vec2(-ray.x/ray.y, ray.z/ray.y));
       }
     } else {
       if (ray.z > 0) {
-        return texcoord_color(texBack, vec3(1,1,0), vec2(-ray.x/ray.z, ray.y/ray.z));
+        // back
+        return texcoord_color(textures[1], vec3(1,1,0), vec2(-ray.x/ray.z, ray.y/ray.z));
       } else {
-        return texcoord_color(texFront, vec3(1,1,1), vec2(-ray.x/ray.z, -ray.y/ray.z));
+        // front
+        return texcoord_color(textures[0], vec3(1,1,1), vec2(-ray.x/ray.z, -ray.y/ray.z));
       }
     }
   }
