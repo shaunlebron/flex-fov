@@ -9,8 +9,10 @@
 in vec2 texcoord;
 
 /* The 6 textures to be rendered */
+uniform int textureCount;
 uniform sampler2D textures[6];
 uniform mat4 coordFrames[6];
+uniform float textureFovs[6];
 
 uniform vec2 pixelOffset[4];
 
@@ -157,7 +159,7 @@ vec3 hybrid_stereo_ray(vec2 c, int i) {
   }
 }
 
-vec4 rubix_color(vec2 coord, vec3 hue) {
+vec4 rubix_color(vec2 uv, int i) {
   if (rubix == 0) {
     return vec4(0,0,0,0);
   }
@@ -169,17 +171,33 @@ vec4 rubix_color(vec2 coord, vec3 hue) {
   int numUnits = numCells * blockSize + padSize;
 
   bool onGrid = (
-    mod(coord.x * numUnits, blockSize) < padSize ||
-    mod(coord.y * numUnits, blockSize) < padSize
+    mod(uv.x * numUnits, blockSize) < padSize ||
+    mod(uv.y * numUnits, blockSize) < padSize
   );
 
+  vec3 hue;
+  switch (i) {
+    case 0: hue = vec3(1,1,1); break;
+    case 1: hue = vec3(0,0,1); break;
+    case 2: hue = vec3(1,0,0); break;
+    case 3: hue = vec3(0,1,0); break;
+    case 4: hue = vec3(1,1,0); break;
+    case 5: hue = vec3(0,1,1); break;
+  }
   return onGrid ? vec4(0,0,0,0) : vec4(hue, 0.3);
 }
 
-vec4 texcoord_color(sampler2D tex, vec3 hue, vec2 coord) {
-  coord = (coord + vec2(1,1)) / 2;
-  vec4 color = texture(tex, coord);
-  vec4 rubix = rubix_color(coord, hue);
+vec4 texuv_color(int i, vec2 uv) {
+  vec4 color;
+  switch (i) {
+    case 0: color = texture(textures[0], uv); break;
+    case 1: color = texture(textures[1], uv); break;
+    case 2: color = texture(textures[2], uv); break;
+    case 3: color = texture(textures[3], uv); break;
+    case 4: color = texture(textures[4], uv); break;
+    case 5: color = texture(textures[5], uv); break;
+  }
+  vec4 rubix = rubix_color(uv, i);
   float a = rubix.a;
   return vec4((1-a)*color.rgb + a*rubix.rgb, 1);
 }
@@ -195,7 +213,7 @@ vec3 frame_forward(mat3 coordFrame) {
 int ray_to_texture_index(vec3 ray) {
   int index=0;
   float maxd=-2;
-  for (int i=0; i<6; i++) {
+  for (int i=0; i<textureCount; i++) {
     float d = dot(ray, frame_forward(mat3(coordFrames[i])));
     if (d > maxd) {
       maxd = d;
@@ -207,16 +225,14 @@ int ray_to_texture_index(vec3 ray) {
 
 vec4 ray_to_color(vec3 ray) {
   //find which side to use
-  int index = ray_to_texture_index(ray);
-  switch (index) {
-    case 0: return vec4(0,0,0,1);
-    case 1: return vec4(0,0,1,1);
-    case 2: return vec4(0,1,0,1);
-    case 3: return vec4(0,1,1,1);
-    case 4: return vec4(1,0,0,1);
-    case 5: return vec4(1,0,1,1);
-    default: return vec4(0,0,0,1);
-  }
+  int i = ray_to_texture_index(ray);
+  vec3 ray2 = mat3(coordFrames[i]) * ray;
+  float d = 0.5 / tan(radians(textureFovs[i]/2.0));
+  vec2 uv = vec2(
+    -ray2.x / ray2.z * d + 0.5,
+    -ray2.y / ray2.z * d + 0.5
+  );
+  return texuv_color(i, uv);
 }
 
 vec2 tex_to_screen(vec2 tex, float aspect) {

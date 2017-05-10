@@ -11,7 +11,7 @@ public class Cube implements Globe {
   }
 
   public static int count = 6;
-  public static float fov = 90;
+  public static float[] fovs = new float[] {90,90,90,90,90,90};
   public static FloatBuffer[] coordFrames = new FloatBuffer[] {
     // front
     createFloatBuffer(new float[] {

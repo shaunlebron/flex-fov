@@ -255,7 +255,11 @@ public abstract class RenderMethod {
 			GL20.glUniform1i(textureUniform, i);
 			int coordFrameUniform = GL20.glGetUniformLocation(shader.getShaderProgram(), "coordFrames["+i+"]");
 			GL20.glUniformMatrix4(coordFrameUniform, false, Cube.coordFrames[i]);
+			int textureFovUniform = GL20.glGetUniformLocation(shader.getShaderProgram(), "textureFovs["+i+"]");
+			GL20.glUniform1f(textureFovUniform, Cube.fovs[i]);
 		}
+		int textureCountUniform = GL20.glGetUniformLocation(shader.getShaderProgram(), "textureCount");
+		GL20.glUniform1i(textureCountUniform, Cube.count);
 
 		int fovUniform = GL20.glGetUniformLocation(shader.getShaderProgram(), "fovx");
 		GL20.glUniform1f(fovUniform, getFOV());
