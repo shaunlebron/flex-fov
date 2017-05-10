@@ -184,44 +184,38 @@ vec4 texcoord_color(sampler2D tex, vec3 hue, vec2 coord) {
   return vec4((1-a)*color.rgb + a*rubix.rgb, 1);
 }
 
+vec3 frame_forward(mat3 coordFrame) {
+  return vec3(
+    -coordFrame[0].z,
+    -coordFrame[1].z,
+    -coordFrame[2].z
+  );
+}
+
+int ray_to_texture_index(vec3 ray) {
+  int index=0;
+  float maxd=-2;
+  for (int i=0; i<6; i++) {
+    float d = dot(ray, frame_forward(mat3(coordFrames[i])));
+    if (d > maxd) {
+      maxd = d;
+      index = i;
+    }
+  }
+  return index;
+}
+
 vec4 ray_to_color(vec3 ray) {
   //find which side to use
-  if (abs(ray.x) > abs(ray.y)) {
-    if (abs(ray.x) > abs(ray.z)) {
-      if (ray.x > 0) {
-        // right
-        return texcoord_color(textures[3], vec3(0,0,1), vec2(ray.z/ray.x, ray.y/ray.x));
-      } else {
-        // left
-        return texcoord_color(textures[2], vec3(1,0,0), vec2(ray.z/ray.x, -ray.y/ray.x));
-      }
-    } else {
-      if (ray.z > 0) {
-        // back
-        return texcoord_color(textures[1], vec3(1,1,0), vec2(-ray.x/ray.z, ray.y/ray.z));
-      } else {
-        // front
-        return texcoord_color(textures[0], vec3(1,1,1), vec2(-ray.x/ray.z, -ray.y/ray.z));
-      }
-    }
-  } else {
-    if (abs(ray.y) > abs(ray.z)) {
-      if (ray.y > 0) {
-        // top
-        return texcoord_color(textures[4], vec3(1,0,1), vec2(ray.x/ray.y, ray.z/ray.y));
-      } else {
-        // bottom
-        return texcoord_color(textures[5], vec3(0,1,1), vec2(-ray.x/ray.y, ray.z/ray.y));
-      }
-    } else {
-      if (ray.z > 0) {
-        // back
-        return texcoord_color(textures[1], vec3(1,1,0), vec2(-ray.x/ray.z, ray.y/ray.z));
-      } else {
-        // front
-        return texcoord_color(textures[0], vec3(1,1,1), vec2(-ray.x/ray.z, -ray.y/ray.z));
-      }
-    }
+  int index = ray_to_texture_index(ray);
+  switch (index) {
+    case 0: return vec4(0,0,0,1);
+    case 1: return vec4(0,0,1,1);
+    case 2: return vec4(0,1,0,1);
+    case 3: return vec4(0,1,1,1);
+    case 4: return vec4(1,0,0,1);
+    case 5: return vec4(1,0,1,1);
+    default: return vec4(0,0,0,1);
   }
 }
 
