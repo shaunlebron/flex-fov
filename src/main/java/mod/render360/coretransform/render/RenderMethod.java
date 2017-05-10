@@ -183,7 +183,7 @@ public abstract class RenderMethod {
 
 		RenderUtil.render360 = true;
 
-		for (int i=0; i<6; i++) {
+		for (int i=0; i<Cube.count; i++) {
 			// set camera/player rotation state (read by hooks at the correct moment)
 			coordFrame = Cube.coordFrames[i];
 
@@ -250,7 +250,7 @@ public abstract class RenderMethod {
 		pixelOffsetUniform = GL20.glGetUniformLocation(shader.getShaderProgram(), "pixelOffset[3]");
 		GL20.glUniform2f(pixelOffsetUniform, 0.25f/mc.displayWidth, 0.25f/mc.displayHeight);
 
-		for (int i=0; i<6; i++) {
+		for (int i=0; i<Cube.count; i++) {
 			int textureUniform = GL20.glGetUniformLocation(shader.getShaderProgram(), "textures["+i+"]");
 			GL20.glUniform1i(textureUniform, i);
 			int coordFrameUniform = GL20.glGetUniformLocation(shader.getShaderProgram(), "coordFrames["+i+"]");
