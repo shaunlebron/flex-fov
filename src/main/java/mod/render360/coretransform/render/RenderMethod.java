@@ -2,6 +2,7 @@ package mod.render360.coretransform.render;
 
 import java.io.IOException;
 import java.util.List;
+import java.nio.FloatBuffer;
 
 import org.lwjgl.opengl.Display;
 import org.lwjgl.opengl.GL11;
@@ -44,7 +45,7 @@ public abstract class RenderMethod {
 	private float prevYaw;
 	private float prevPitch;
 
-	public float[] coordFrame;
+	public FloatBuffer coordFrame;
 
 	public Entity player;
 	public float playerDeltaYaw;
@@ -187,9 +188,9 @@ public abstract class RenderMethod {
 			coordFrame = Cube.coordFrames[i];
 
 			// the forward vector is the opposite direction of the z-axis
-			float x = -coordFrame[2];
-			float y = -coordFrame[6];
-			float z = -coordFrame[10];
+			float x = -coordFrame.get(2);
+			float y = -coordFrame.get(6);
+			float z = -coordFrame.get(10);
 
 			// calculate the delta yaw/pitch to point the player
 			float lon = (float)Math.atan2(x, -z);
@@ -252,6 +253,8 @@ public abstract class RenderMethod {
 		for (int i=0; i<6; i++) {
 			int textureUniform = GL20.glGetUniformLocation(shader.getShaderProgram(), "textures["+i+"]");
 			GL20.glUniform1i(textureUniform, i);
+			int coordFrameUniform = GL20.glGetUniformLocation(shader.getShaderProgram(), "coordFrames["+i+"]");
+			GL20.glUniformMatrix4(coordFrameUniform, false, Cube.coordFrames[i]);
 		}
 
 		int fovUniform = GL20.glGetUniformLocation(shader.getShaderProgram(), "fovx");

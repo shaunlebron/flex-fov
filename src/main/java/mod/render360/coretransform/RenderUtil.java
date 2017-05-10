@@ -3,7 +3,6 @@ package mod.render360.coretransform;
 import java.io.IOException;
 import java.nio.FloatBuffer;
 
-import org.lwjgl.BufferUtils;
 import org.lwjgl.input.Mouse;
 import org.lwjgl.opengl.Display;
 import org.lwjgl.opengl.GL11;
@@ -24,8 +23,6 @@ import net.minecraft.client.shader.Framebuffer;
 import net.minecraft.entity.Entity;
 
 public class RenderUtil {
-
-	private static final FloatBuffer BUF_FLOAT_16 = BufferUtils.createFloatBuffer(16);
 
 	/**Enables or disables 360 degree rendering.*/
 	public static boolean render360 = true;
@@ -177,15 +174,8 @@ public class RenderUtil {
 	 * {@link net.minecraft.client.renderer.EntityRenderer#setupCameraTransform(float, int) setupCameraTransform}
 	 */
 	public static void rotateCamera() {
-		float[] coordFrame = renderMethod.coordFrame;
-		if (coordFrame != null) {
-			FloatBuffer f = BUF_FLOAT_16;
-			f.clear();
-			for (int i=0; i<16; i++) {
-				f.put(coordFrame[i]);
-			}
-			f.rewind();
-			GlStateManager.multMatrix(f);
+		if (renderMethod.coordFrame != null) {
+			GlStateManager.multMatrix(renderMethod.coordFrame);
 		}
 	}
 

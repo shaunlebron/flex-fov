@@ -10,6 +10,7 @@ in vec2 texcoord;
 
 /* The 6 textures to be rendered */
 uniform sampler2D textures[6];
+uniform mat4 coordFrames[6];
 
 uniform vec2 pixelOffset[4];
 

@@ -1,50 +1,59 @@
 package mod.render360.coretransform.render;
+import java.nio.FloatBuffer;
+import org.lwjgl.BufferUtils;
 
 public class Cube implements Globe {
+  public static FloatBuffer createFloatBuffer(float[] floats) {
+    FloatBuffer buffer = BufferUtils.createFloatBuffer(16);
+    buffer.put(floats);
+    buffer.rewind();
+    return buffer;
+  }
+
   public static int count = 6;
   public static float fov = 90;
-  public static float[][] coordFrames = new float[][] {
+  public static FloatBuffer[] coordFrames = new FloatBuffer[] {
     // front
-    new float[] {
+    createFloatBuffer(new float[] {
       1, 0, 0, 0,
       0, 1, 0, 0,
       0, 0, 1, 0,
       0, 0, 0, 1
-    },
+    }),
     // back
-    new float[] {
+    createFloatBuffer(new float[] {
      -1, 0, 0, 0,
       0, 1, 0, 0,
       0, 0,-1, 0,
       0, 0, 0, 1
-    },
+    }),
     // left
-    new float[] {
+    createFloatBuffer(new float[] {
       0, 0, 1, 0,
       0, 1, 0, 0,
      -1, 0, 0, 0,
       0, 0, 0, 1
-    },
+    }),
     // right
-    new float[] {
+    createFloatBuffer(new float[] {
       0, 0,-1, 0,
       0, 1, 0, 0,
       1, 0, 0, 0,
       0, 0, 0, 1
-    },
+    }),
     // up
-    new float[] {
+    createFloatBuffer(new float[] {
       1, 0, 0, 0,
       0, 0,-1, 0,
       0, 1, 0, 0,
       0, 0, 0, 1
-    },
+    }),
     // down
-    new float[] {
+    createFloatBuffer(new float[] {
       1, 0, 0, 0,
       0, 0, 1, 0,
       0,-1, 0, 0,
       0, 0, 0, 1
-    },
+    }),
   };
 }
