@@ -39,6 +39,7 @@ public abstract class RenderMethod {
 	protected static boolean resizeGui = false;
 	protected static boolean rubix = false;
 	protected static boolean split = false;
+	// protected static Globe globe = new Trism();
 	protected static Globe globe = new Cube();
 
 	private float yaw; //TODO remove
