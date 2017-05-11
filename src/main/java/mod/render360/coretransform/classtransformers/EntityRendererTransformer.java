@@ -42,28 +42,20 @@ public class EntityRendererTransformer extends ClassTransformer {
 
 			public void transform(ClassNode classNode, MethodNode method, boolean obfuscated) {
 				CLTLog.info("Found method: " + method.name + " " + method.desc);
-				for (AbstractInsnNode instruction : method.instructions.toArray()) {
 
-					if (instruction.getOpcode() == ALOAD) {
-						CLTLog.info("Found ALOAD in method " + getMethodName());
+				// if (RenderUtil.render360) { return RenderUtil.renderMethod.playerFov; }
+				InsnList toInsert = new InsnList();
+				LabelNode label = new LabelNode();
+				toInsert.add(new FieldInsnNode(GETSTATIC, Type.getInternalName(RenderUtil.class), "render360", "Z"));
+				toInsert.add(new JumpInsnNode(IFEQ, label));
+				toInsert.add(new FieldInsnNode(GETSTATIC, Type.getInternalName(RenderUtil.class),
+						"renderMethod", "L" + Type.getInternalName(RenderMethod.class) + ";"));
+				toInsert.add(new FieldInsnNode(GETFIELD, Type.getInternalName(RenderMethod.class), "playerFov", "F"));
+				toInsert.add(new InsnNode(FRETURN));
+				toInsert.add(label);
 
-						InsnList toInsert = new InsnList();
-						LabelNode label = new LabelNode();
-
-						// change "if (this.debugView)" to "if (RenderUtil.render360 || this.debugView)"
-						toInsert.add(new FieldInsnNode(GETSTATIC, Type.getInternalName(RenderUtil.class), "render360", "Z"));
-						toInsert.add(new JumpInsnNode(IFNE, label));
-						method.instructions.insertBefore(instruction, toInsert);
-
-						//Find LDC 90.0
-						for (int i = 0; i < 3; i++) {
-							instruction = instruction.getNext();
-						}
-						method.instructions.insertBefore(instruction, label);
-
-						break;
-					}
-				}
+				AbstractInsnNode instruction = method.instructions.getFirst();
+				method.instructions.insertBefore(instruction, toInsert);
 			}
 		};
 

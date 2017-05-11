@@ -39,8 +39,8 @@ public abstract class RenderMethod {
 	protected static boolean resizeGui = false;
 	protected static boolean rubix = false;
 	protected static boolean split = false;
-	// protected static Globe globe = new Trism();
-	protected static Globe globe = new Cube();
+	protected static Globe globe = new Trism();
+	// protected static Globe globe = new Cube();
 
 	private float yaw; //TODO remove
 	private float pitch;
@@ -52,6 +52,7 @@ public abstract class RenderMethod {
 	public Entity player;
 	public float playerDeltaYaw;
 	public float playerDeltaPitch;
+	public float playerFov;
 
 	static {
 		//Put all of the render methods here
@@ -188,6 +189,7 @@ public abstract class RenderMethod {
 		for (int i=0; i<globe.getCount(); i++) {
 			// set camera/player rotation state (read by hooks at the correct moment)
 			coordFrame = globe.getCoordFrame(i);
+			playerFov = globe.getFov(i);
 
 			// the forward vector is the opposite direction of the z-axis
 			float x = -coordFrame.get(2);
