@@ -10,50 +10,71 @@ public class Cube implements Globe {
     return buffer;
   }
 
-  public static int count = 6;
-  public static float[] fovs = new float[] {90,90,90,90,90,90};
-  public static FloatBuffer[] coordFrames = new FloatBuffer[] {
-    // front
-    createFloatBuffer(new float[] {
-      1, 0, 0, 0,
-      0, 1, 0, 0,
-      0, 0, 1, 0,
-      0, 0, 0, 1
-    }),
-    // back
-    createFloatBuffer(new float[] {
-     -1, 0, 0, 0,
-      0, 1, 0, 0,
-      0, 0,-1, 0,
-      0, 0, 0, 1
-    }),
-    // left
-    createFloatBuffer(new float[] {
-      0, 0, 1, 0,
-      0, 1, 0, 0,
-     -1, 0, 0, 0,
-      0, 0, 0, 1
-    }),
-    // right
-    createFloatBuffer(new float[] {
-      0, 0,-1, 0,
-      0, 1, 0, 0,
-      1, 0, 0, 0,
-      0, 0, 0, 1
-    }),
-    // up
-    createFloatBuffer(new float[] {
-      1, 0, 0, 0,
-      0, 0,-1, 0,
-      0, 1, 0, 0,
-      0, 0, 0, 1
-    }),
-    // down
-    createFloatBuffer(new float[] {
-      1, 0, 0, 0,
-      0, 0, 1, 0,
-      0,-1, 0, 0,
-      0, 0, 0, 1
-    }),
-  };
+  private int count;
+  private float[] fovs;
+  private FloatBuffer[] coordFrames;
+
+  @Override
+  public int getCount() {
+    return count;
+  }
+
+  @Override
+  public float getFov(int i) {
+    return fovs[i];
+  }
+
+  @Override
+  public FloatBuffer getCoordFrame(int i) {
+    return coordFrames[i];
+  }
+
+  public Cube() {
+    count = 6;
+    fovs = new float[] {90,90,90,90,90,90};
+    coordFrames = new FloatBuffer[] {
+      // front
+      createFloatBuffer(new float[] {
+        1, 0, 0, 0,
+        0, 1, 0, 0,
+        0, 0, 1, 0,
+        0, 0, 0, 1
+      }),
+      // back
+      createFloatBuffer(new float[] {
+       -1, 0, 0, 0,
+        0, 1, 0, 0,
+        0, 0,-1, 0,
+        0, 0, 0, 1
+      }),
+      // left
+      createFloatBuffer(new float[] {
+        0, 0, 1, 0,
+        0, 1, 0, 0,
+       -1, 0, 0, 0,
+        0, 0, 0, 1
+      }),
+      // right
+      createFloatBuffer(new float[] {
+        0, 0,-1, 0,
+        0, 1, 0, 0,
+        1, 0, 0, 0,
+        0, 0, 0, 1
+      }),
+      // up
+      createFloatBuffer(new float[] {
+        1, 0, 0, 0,
+        0, 0,-1, 0,
+        0, 1, 0, 0,
+        0, 0, 0, 1
+      }),
+      // down
+      createFloatBuffer(new float[] {
+        1, 0, 0, 0,
+        0, 0, 1, 0,
+        0,-1, 0, 0,
+        0, 0, 0, 1
+      }),
+    };
+  }
 }

@@ -39,6 +39,7 @@ public abstract class RenderMethod {
 	protected static boolean resizeGui = false;
 	protected static boolean rubix = false;
 	protected static boolean split = false;
+	protected static Globe globe = new Cube();
 
 	private float yaw; //TODO remove
 	private float pitch;
@@ -183,9 +184,9 @@ public abstract class RenderMethod {
 
 		RenderUtil.render360 = true;
 
-		for (int i=0; i<Cube.count; i++) {
+		for (int i=0; i<globe.getCount(); i++) {
 			// set camera/player rotation state (read by hooks at the correct moment)
-			coordFrame = Cube.coordFrames[i];
+			coordFrame = globe.getCoordFrame(i);
 
 			// the forward vector is the opposite direction of the z-axis
 			float x = -coordFrame.get(2);
@@ -250,16 +251,16 @@ public abstract class RenderMethod {
 		pixelOffsetUniform = GL20.glGetUniformLocation(shader.getShaderProgram(), "pixelOffset[3]");
 		GL20.glUniform2f(pixelOffsetUniform, 0.25f/mc.displayWidth, 0.25f/mc.displayHeight);
 
-		for (int i=0; i<Cube.count; i++) {
+		for (int i=0; i<globe.getCount(); i++) {
 			int textureUniform = GL20.glGetUniformLocation(shader.getShaderProgram(), "textures["+i+"]");
 			GL20.glUniform1i(textureUniform, i);
 			int coordFrameUniform = GL20.glGetUniformLocation(shader.getShaderProgram(), "coordFrames["+i+"]");
-			GL20.glUniformMatrix4(coordFrameUniform, false, Cube.coordFrames[i]);
+			GL20.glUniformMatrix4(coordFrameUniform, false, globe.getCoordFrame(i));
 			int textureFovUniform = GL20.glGetUniformLocation(shader.getShaderProgram(), "textureFovs["+i+"]");
-			GL20.glUniform1f(textureFovUniform, Cube.fovs[i]);
+			GL20.glUniform1f(textureFovUniform, globe.getFov(i));
 		}
 		int textureCountUniform = GL20.glGetUniformLocation(shader.getShaderProgram(), "textureCount");
-		GL20.glUniform1i(textureCountUniform, Cube.count);
+		GL20.glUniform1i(textureCountUniform, globe.getCount());
 
 		int fovUniform = GL20.glGetUniformLocation(shader.getShaderProgram(), "fovx");
 		GL20.glUniform1f(fovUniform, getFOV());
