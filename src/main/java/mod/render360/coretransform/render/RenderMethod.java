@@ -34,13 +34,13 @@ public abstract class RenderMethod {
 	 * Contains all render methods
 	 */
 	private static final RenderMethod[] renderMethods;
+	private static final Globe[] globes;
 
 	protected static float quality = 1;
 	protected static boolean resizeGui = false;
 	protected static boolean rubix = false;
 	protected static boolean split = false;
-	protected static Globe globe = new Trism();
-	// protected static Globe globe = new Cube();
+	protected static int globeIndex = 0;
 
 	private float yaw; //TODO remove
 	private float pitch;
@@ -59,6 +59,11 @@ public abstract class RenderMethod {
 		renderMethods = new RenderMethod[] {
 			new Standard(),
 			new Flex(),
+		};
+
+		globes = new Globe[] {
+			new Cube(),
+			new Trism(),
 		};
 	}
 
@@ -186,6 +191,7 @@ public abstract class RenderMethod {
 
 		RenderUtil.render360 = true;
 
+		Globe globe = globes[globeIndex];
 		for (int i=0; i<globe.getCount(); i++) {
 			// set camera/player rotation state (read by hooks at the correct moment)
 			coordFrame = globe.getCoordFrame(i);
@@ -254,6 +260,7 @@ public abstract class RenderMethod {
 		pixelOffsetUniform = GL20.glGetUniformLocation(shader.getShaderProgram(), "pixelOffset[3]");
 		GL20.glUniform2f(pixelOffsetUniform, 0.25f/mc.displayWidth, 0.25f/mc.displayHeight);
 
+		Globe globe = globes[globeIndex];
 		for (int i=0; i<globe.getCount(); i++) {
 			int textureUniform = GL20.glGetUniformLocation(shader.getShaderProgram(), "textures["+i+"]");
 			GL20.glUniform1i(textureUniform, i);
@@ -318,6 +325,8 @@ public abstract class RenderMethod {
 		buttonList.add(new Slider(new Responder(), 18102, width / 2 + 5, height / 6 + 48, 150, 20, "Quality", 0.1f, 5f, quality, 0.1f, null));
 		buttonList.add(new GuiButton(18103, width / 2 - 155, height / 6 + 78, 150, 20, "Rubix: " + (rubix ? "ON" : "OFF")));
 		buttonList.add(new GuiButton(18105, width / 2 - 155, height / 6 + 108, 150, 20, "Split Compare: " + (split ? "ON" : "OFF")));
+		Globe globe = globes[globeIndex];
+		buttonList.add(new GuiButton(18106, width / 2 + 5, height / 6 + 78, 150, 20, "Globe: " + globe.getName()));
 	}
 
 	public void onButtonPress(GuiButton button) {
@@ -331,6 +340,10 @@ public abstract class RenderMethod {
 		} else if (button.id == 18105) {
 			split = !split;
 			button.displayString = "Split Compare: " + (split ? "ON" : "OFF");
+		} else if (button.id == 18106) {
+			globeIndex = (globeIndex + 1) % globes.length;
+			Globe globe = globes[globeIndex];
+			button.displayString = "Globe: " + globe.getName();
 		}
 	}
 

@@ -15,6 +15,11 @@ public class Trism implements Globe {
   private FloatBuffer[] coordFrames;
 
   @Override
+  public String getName() {
+    return "Trism";
+  }
+
+  @Override
   public int getCount() {
     return count;
   }

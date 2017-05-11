@@ -15,6 +15,11 @@ public class Cube implements Globe {
   private FloatBuffer[] coordFrames;
 
   @Override
+  public String getName() {
+    return "Cube";
+  }
+
+  @Override
   public int getCount() {
     return count;
   }
