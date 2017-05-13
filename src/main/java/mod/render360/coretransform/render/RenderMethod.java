@@ -295,7 +295,7 @@ public abstract class RenderMethod {
 		GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, shader.getVbo());
 		GL20.glEnableVertexAttribArray(0);
 		GL20.glVertexAttribPointer(0, 2, GL11.GL_BYTE, false, 0, 0L);
-		for (int i = 0; i < framebufferTextures.length; i++) {
+		for (int i = 0; i < globe.getCount(); i++) {
 			GL13.glActiveTexture(GL13.GL_TEXTURE0+i);
 			GL11.glBindTexture(GL11.GL_TEXTURE_2D, framebufferTextures[i]);
 		}
@@ -311,7 +311,7 @@ public abstract class RenderMethod {
 		GL11.glPopMatrix();
 
 		//unbind textures
-		for (int i = framebufferTextures.length-1; i >= 0; i--) {
+		for (int i = globe.getCount()-1; i >= 0; i--) {
 			GL13.glActiveTexture(GL13.GL_TEXTURE0+i);
 			GL11.glBindTexture(GL11.GL_TEXTURE_2D, 0);
 		}
