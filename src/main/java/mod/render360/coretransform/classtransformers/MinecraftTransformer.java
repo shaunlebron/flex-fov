@@ -3,6 +3,9 @@ package mod.render360.coretransform.classtransformers;
 import static org.objectweb.asm.Opcodes.ALOAD;
 import static org.objectweb.asm.Opcodes.INVOKESTATIC;
 
+import mod.render360.coretransform.classtransformers.name.ClassName;
+import mod.render360.coretransform.classtransformers.name.MethodName;
+import mod.render360.coretransform.classtransformers.name.Names;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.ClassNode;
 import org.objectweb.asm.tree.InsnList;
@@ -17,26 +20,25 @@ import mod.render360.coretransform.classtransformers.ClassTransformer.MethodTran
 import net.minecraft.client.multiplayer.WorldClient;
 
 public class MinecraftTransformer extends ClassTransformer {
-	
-	protected MinecraftTransformer() {
-		//Prevents this class from accidentally being called
+
+	@Override
+	public ClassName getName() {
+		return Names.Minecraft;
 	}
-	
-	@Override
-	public String getObfuscatedClassName() {return "beq";}
-	
-	@Override
-	public String getClassName() {return "net.minecraft.client.Minecraft";}
 
 	@Override
 	public MethodTransformer[] getMethodTransformers() {
-		MethodTransformer loadWorldTransformer = new MethodTransformer() {
-			public String getMethodName() {return CoreLoader.isObfuscated ? "a" : "loadWorld";}
-			public String getDescName() {return "(L" + (CoreLoader.isObfuscated ? "bno" : Type.getInternalName(WorldClient.class)) + ";Ljava/lang/String;)V";}
-			
+		MethodTransformer transformLoadWorld = new MethodTransformer() {
+
+			@Override
+			public MethodName getName() {
+				return Names.Minecraft_loadWorld;
+			}
+
+			@Override
 			public void transform(ClassNode classNode, MethodNode method, boolean obfuscated) {
 				CLTLog.info("Found method: " + method.name + " " + method.desc);
-				CLTLog.info("begining at start of method " + getMethodName());
+				CLTLog.info("begining at start of method " + getName().all());
 				
 				InsnList toInsert = new InsnList();
 				toInsert.add(new VarInsnNode(ALOAD, 1)); //worldClientIn
@@ -46,7 +48,7 @@ public class MinecraftTransformer extends ClassTransformer {
 			}
 		};
 		
-		return new MethodTransformer[] {loadWorldTransformer};
+		return new MethodTransformer[] {transformLoadWorld};
 	}
 
 }

@@ -47,8 +47,7 @@ public class CoreTransformer implements IClassTransformer {
 		for (ClassTransformer classTransformer : classTransformers) {
 			
 			//if the class transformer should modify this class
-			if (name.equals(classTransformer.getObfuscatedClassName()) ||
-					name.equals(classTransformer.getClassName())) {
+			if (name.equals(classTransformer.getName().getName())) {
 				
 				CLTLog.info(String.format("Class: %s", name));
 				boolean obfuscated = CoreLoader.isObfuscated;
@@ -64,7 +63,7 @@ public class CoreTransformer implements IClassTransformer {
 					//transform methods
 					for (MethodNode method : classNode.methods) {
 						for (MethodTransformer mt : mts) {
-							if (method.name.equals(mt.getMethodName()) && method.desc.equals(mt.getDescName())) {
+							if (method.name.equals(mt.getName().getShortName(obfuscated)) && method.desc.equals(mt.getName().getDesc(obfuscated))) {
 								mt.transform(classNode, method, obfuscated);
 							}
 						}
