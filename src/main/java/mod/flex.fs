@@ -263,22 +263,24 @@ vec2 tex_to_splitscreen(vec2 tex, out int i) {
 // number (0-2) that we use to compare projections.
 vec3 screen_to_ray(vec2 c, int i) {
   vec3 ray;
-  if (fovx < 120) {
+  if (fovx < 90) {
     ray = standard_ray(c);
-  } else if (fovx < 140) {
-    ray = mix(standard_ray(c), hybrid_stereo_ray(c, i), (fovx - 120)/ 20.0);
-  } else if (fovx < 200) {
-    ray = hybrid_stereo_ray(c, i);
-  } else if (fovx < 220) {
-    ray = mix(hybrid_stereo_ray(c, i), mercator_ray(c), (fovx - 200)/ 20.0);
-  } else if (fovx < 340) {
+  } else if (fovx < 160) {
+		float linear = (fovx - 90)/ 70.0;
+		float parabola = 1-(linear-1)*(linear-1);
+    ray = mix(standard_ray(c), hybrid_stereo_ray(c, i), parabola);
+  } else if (fovx < 300) {
+		float linear = (fovx - 160)/ 140.0;
+		float parabola = 1-(linear-1)*(linear-1);
+    ray = mix(hybrid_stereo_ray(c, i), mercator_ray(c), parabola);
+  } else if (fovx <= 360) {
     ray = mercator_ray(c);
-  } else if (fovx < 360) {
-    ray = mix(mercator_ray(c), equirect_ray(c), (fovx - 340)/ 20.0);
-    float len = length(ray);
+  //} else if (fovx < 360) {
+    //ray = mix(mercator_ray(c), equirect_ray(c), (fovx - 340)/ 20.0);
+    //float len = length(ray);
     // alpha = clamp(len*2, 0, 1);
-  } else if (fovx == 360) {
-    ray = equirect_ray(c);
+  //} else if (fovx == 360) {
+    //ray = equirect_ray(c);
   } else {
     ray = vec3(0,0,0);
   }

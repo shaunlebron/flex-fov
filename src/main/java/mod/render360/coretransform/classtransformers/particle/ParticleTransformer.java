@@ -1,5 +1,8 @@
 package mod.render360.coretransform.classtransformers.particle;
 
+import mod.render360.coretransform.classtransformers.name.ClassName;
+import mod.render360.coretransform.classtransformers.name.MethodName;
+import mod.render360.coretransform.classtransformers.name.Names;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.AbstractInsnNode;
 import org.objectweb.asm.tree.ClassNode;
@@ -31,27 +34,18 @@ public class ParticleTransformer extends ClassTransformer {
 	}
 
 	@Override
-	public String getObfuscatedClassName() {
-		return "bos";
-	}
-
-	@Override
-	public String getClassName() {
-		return "net.minecraft.client.particle.Particle";
+	public ClassName getName() {
+		return Names.Particle;
 	}
 
 	@Override
 	public MethodTransformer[] getMethodTransformers() {
 		
 		MethodTransformer transformRenderParticle = new MethodTransformer() {
-			public String getMethodName() {return CoreLoader.isObfuscated ? "a" : "renderParticle";}
-			public String getDescName() {
-				if (CoreLoader.isObfuscated) {
-					return "(Lbpw;Lsm;FFFFFF)V";
-				} else {
-					return "(L" + Type.getInternalName(VertexBuffer.class) +
-							";L" + Type.getInternalName(Entity.class) + ";FFFFFF)V";
-				}
+
+			@Override
+			public MethodName getName() {
+				return Names.Particle_renderParticle;
 			}
 			
 			@Override
@@ -60,7 +54,7 @@ public class ParticleTransformer extends ClassTransformer {
 				
 				for (AbstractInsnNode instruction : method.instructions.toArray()) {
 					if (instruction.getOpcode() == ANEWARRAY) {
-						CLTLog.info("Found ANEWARRAY in method " + getMethodName());
+						CLTLog.info("Found ANEWARRAY in method " + getName().all());
 						
 						instruction = instruction.getPrevious();
 						

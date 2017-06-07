@@ -2,6 +2,9 @@ package mod.render360.coretransform.classtransformers;
 
 import static org.objectweb.asm.Opcodes.*;
 
+import mod.render360.coretransform.classtransformers.name.ClassName;
+import mod.render360.coretransform.classtransformers.name.MethodName;
+import mod.render360.coretransform.classtransformers.name.Names;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.AbstractInsnNode;
 import org.objectweb.asm.tree.ClassNode;
@@ -21,25 +24,24 @@ import mod.render360.coretransform.RenderUtil;
 import mod.render360.coretransform.render.RenderMethod;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
-import net.minecraft.client.renderer.GlStateManager;
-import net.minecraft.client.renderer.RenderGlobal;
-import net.minecraft.client.renderer.culling.ICamera;
-import net.minecraft.entity.Entity;
 
 public class EntityRendererTransformer extends ClassTransformer {
 
 	@Override
-	public String getObfuscatedClassName() {return "bqc";}
-
-	@Override
-	public String getClassName() {return "net.minecraft.client.renderer.EntityRenderer";}
+	public ClassName getName() {
+		return Names.EntityRenderer;
+	}
 
 	@Override
 	public MethodTransformer[] getMethodTransformers() {
 		MethodTransformer transformGetFOVModifier = new MethodTransformer() {
-			public String getMethodName() {return CoreLoader.isObfuscated ? "a" : "getFOVModifier";}
-			public String getDescName() {return "(FZ)F";}
 
+			@Override
+			public MethodName getName() {
+				return Names.EntityRenderer_getFOVModifier;
+			}
+
+			@Override
 			public void transform(ClassNode classNode, MethodNode method, boolean obfuscated) {
 				CLTLog.info("Found method: " + method.name + " " + method.desc);
 
@@ -64,15 +66,19 @@ public class EntityRendererTransformer extends ClassTransformer {
 		 * This is not being used. FIXME when MCP updates
 		 */
 		MethodTransformer transformOrientCamera = new MethodTransformer() {
-			public String getMethodName() {return CoreLoader.isObfuscated ? "a" : "orientCamera";}
-			public String getDescName() {return "(F)V";}
 
+			@Override
+			public MethodName getName() {
+				return Names.EntityRenderer_orientCamera;
+			}
+
+			@Override
 			public void transform(ClassNode classNode, MethodNode method, boolean obfuscated) {
 				CLTLog.info("Found method: " + method.name + " " + method.desc);
 				for (AbstractInsnNode instruction : method.instructions.toArray()) {
 
 					if (instruction.getOpcode() == INSTANCEOF) {
-						CLTLog.info("Found INSTANCEOF in method " + getMethodName());
+						CLTLog.info("Found INSTANCEOF in method " + getName().all());
 
 						instruction = instruction.getPrevious();
 
@@ -87,9 +93,13 @@ public class EntityRendererTransformer extends ClassTransformer {
 		};
 
 		MethodTransformer transformSetupCameraTransform = new MethodTransformer() {
-			public String getMethodName() {return CoreLoader.isObfuscated ? "a" : "setupCameraTransform";}
-			public String getDescName() {return "(FI)V";}
 
+			@Override
+			public MethodName getName() {
+				return Names.EntityRenderer_setupCameraTransform;
+			}
+
+			@Override
 			public void transform(ClassNode classNode, MethodNode method, boolean obfuscated) {
 				CLTLog.info("Found method: " + method.name + " " + method.desc);
 				int count = 0;
@@ -97,7 +107,8 @@ public class EntityRendererTransformer extends ClassTransformer {
 				for (AbstractInsnNode instruction : method.instructions.toArray()) {
 					if (instruction instanceof MethodInsnNode) {
 						MethodInsnNode methodCall = (MethodInsnNode)instruction;
-						if (methodCall.name.equals("loadIdentity")) {
+						if (methodCall.name.equals(Names.GlStateManager_loadIdentity.getShortName(obfuscated)) &&
+								methodCall.desc.equals(Names.GlStateManager_loadIdentity.getDesc(obfuscated))) {
 							count++;
 							CLTLog.info("found loadIdentity "+count);
 						}
@@ -120,9 +131,10 @@ public class EntityRendererTransformer extends ClassTransformer {
 				for (AbstractInsnNode instruction : method.instructions.toArray()) {
 					if (instruction instanceof MethodInsnNode) {
 						MethodInsnNode methodCall = (MethodInsnNode)instruction;
-						if (methodCall.name.equals("orientCamera")) {
+						if (methodCall.name.equals(Names.EntityRenderer_orientCamera.getShortName(obfuscated)) &&
+								methodCall.desc.equals(Names.EntityRenderer_orientCamera.getDesc(obfuscated))) {
 							hook = instruction;
-							CLTLog.info("found orientCamera");
+							CLTLog.info("Found method: " + Names.EntityRenderer_orientCamera.all());
 							break;
 						}
 					}
@@ -142,10 +154,9 @@ public class EntityRendererTransformer extends ClassTransformer {
 		MethodTransformer transformUpdateCameraAndRender = new MethodTransformer() {
 
 			@Override
-			public String getMethodName() {return CoreLoader.isObfuscated ? "a" : "updateCameraAndRender";}
-
-			@Override
-			public String getDescName() {return "(FJ)V";}
+			public MethodName getName() {
+				return Names.EntityRenderer_updateCameraAndRender;
+			}
 
 			@Override
 			public void transform(ClassNode classNode, MethodNode method, boolean obfuscated) {
@@ -154,7 +165,7 @@ public class EntityRendererTransformer extends ClassTransformer {
 
 					if (instruction.getOpcode() == SIPUSH &&
 							instruction.getNext().getOpcode() == LDC) {
-						CLTLog.info("Found SIPUSH in method " + getMethodName());
+						CLTLog.info("Found SIPUSH in method " + getName().all());
 
 						//go to start of method call
 						for (int i = 0; i < 16; i++) {
@@ -185,7 +196,7 @@ public class EntityRendererTransformer extends ClassTransformer {
 					if (instruction.getOpcode() == ILOAD &&
 							instruction.getPrevious().getOpcode() == GETFIELD &&
 							instruction.getNext().getOpcode() == ILOAD) {
-						CLTLog.info("Found ILOAD in method " + getMethodName());
+						CLTLog.info("Found ILOAD in method " + getName().all());
 
 						InsnList toInsert = new InsnList();
 
@@ -243,23 +254,27 @@ public class EntityRendererTransformer extends ClassTransformer {
 		};
 
 		MethodTransformer transformRenderWorld = new MethodTransformer() {
-			public String getMethodName() {return CoreLoader.isObfuscated ? "b" : "renderWorld";}
-			public String getDescName() {return "(FJ)V";}
 
+			@Override
+			public MethodName getName() {
+				return Names.EntityRenderer_renderWorld;
+			}
+
+			@Override
 			public void transform(ClassNode classNode, MethodNode method, boolean obfuscated) {
 				CLTLog.info("Found method: " + method.name + " " + method.desc);
 				for (AbstractInsnNode instruction : method.instructions.toArray()) {
 
 					if (instruction.getOpcode() == ALOAD &&
 							instruction.getNext().getOpcode() == ICONST_2) {
-						CLTLog.info("Found ALOAD in method " + getMethodName());
+						CLTLog.info("Found ALOAD in method " + getName().all());
 
 						InsnList toInsert = new InsnList();
 
 						// void RenderUtil.setupRenderWorld(EntityRenderer, mc, p_78471_1_, p_78471_2_);
 						toInsert.add(new VarInsnNode(ALOAD, 0)); //this
 						toInsert.add(new VarInsnNode(ALOAD, 0)); //this
-						toInsert.add(new FieldInsnNode(GETFIELD, classNode.name, obfuscated ? "field_78531_r" : "mc", "L" + Type.getInternalName(Minecraft.class) + ";")); //mc
+						toInsert.add(new FieldInsnNode(GETFIELD, classNode.name, Names.EntityRenderer_mc.getFullName(obfuscated), Names.EntityRenderer_mc.getDesc(obfuscated))); //mc
 						toInsert.add(new VarInsnNode(FLOAD, 1));
 						toInsert.add(new VarInsnNode(LLOAD, 2));
 						toInsert.add(new MethodInsnNode(INVOKESTATIC, Type.getInternalName(RenderUtil.class), "setupRenderWorld",
@@ -282,15 +297,19 @@ public class EntityRendererTransformer extends ClassTransformer {
 		};
 
 		MethodTransformer transformRenderWorldPass = new MethodTransformer() {
-			public String getMethodName() {return CoreLoader.isObfuscated ? "a" : "renderWorldPass";}
-			public String getDescName() {return "(IFJ)V";}
 
+			@Override
+			public MethodName getName() {
+				return Names.EntityRenderer_renderWorldPass;
+			}
+
+			@Override
 			public void transform(ClassNode classNode, MethodNode method, boolean obfuscated) {
 				CLTLog.info("Found method: " + method.name + " " + method.desc);
 				for (AbstractInsnNode instruction : method.instructions.toArray()) {
 
 					if (instruction.getOpcode() == LDC) {
-						CLTLog.info("found LDC in method " + getMethodName());
+						CLTLog.info("found LDC in method " + getName().all());
 
 						InsnList toInsert = new InsnList();
 						LabelNode clearNode = new LabelNode();
@@ -325,7 +344,7 @@ public class EntityRendererTransformer extends ClassTransformer {
 				}
 
 				AbstractInsnNode instruction = method.instructions.getLast();
-				CLTLog.info("reached end of method " + getMethodName());
+				CLTLog.info("reached end of method " + getName().all());
 
 
 				instruction = instruction.getPrevious();
@@ -362,9 +381,12 @@ public class EntityRendererTransformer extends ClassTransformer {
 		};
 
 		//Fix sunset color
-		MethodTransformer updateFogColorTransformer = new MethodTransformer() {
-			public String getMethodName() {return CoreLoader.isObfuscated ? "h" : "updateFogColor";}
-			public String getDescName() {return "(F)V";}
+		MethodTransformer transformUpdateFogColor = new MethodTransformer() {
+
+			@Override
+			public MethodName getName() {
+				return Names.EntityRenderer_updateFogColor;
+			}
 
 			@Override
 			public void transform(ClassNode classNode, MethodNode method, boolean obfuscated) {
@@ -374,7 +396,7 @@ public class EntityRendererTransformer extends ClassTransformer {
 					if (instruction.getOpcode() == D2F &&
 							instruction.getPrevious().getOpcode() == INVOKEVIRTUAL &&
 							instruction.getNext().getOpcode() == FSTORE) {
-						CLTLog.info("found D2F in method " + getMethodName());
+						CLTLog.info("found D2F in method " + getName().all());
 
 						//after float f5 = (float)entity.getLook(partialTicks).dotProduct(vec3d2);
 						for (int i = 0; i < 3; i++) {
@@ -406,27 +428,23 @@ public class EntityRendererTransformer extends ClassTransformer {
 			}
 		};
 
-		MethodTransformer drawNameplateTransformer = new MethodTransformer() {
-			public String getMethodName() {return CoreLoader.isObfuscated ? "a" : "drawNameplate";}
-			public String getDescName() {
-				String descName;
-				if (CoreLoader.isObfuscated) {
-					descName = "(Lbfe;L" + Type.getInternalName(String.class) + ";FFFIFFZZ)V";
-				} else {
-					descName = "(L" + Type.getInternalName(FontRenderer.class) + ";L" +
-							Type.getInternalName(String.class) + ";FFFIFFZZ)V";
-				}
-				return descName;
+		//FIXME remove?
+		MethodTransformer transformDrawNameplate = new MethodTransformer() {
+
+			@Override
+			public MethodName getName() {
+				return Names.EntityRenderer_drawNameplate;
 			}
 
+			@Override
 			public void transform(ClassNode classNode, MethodNode method, boolean obfuscated) {
 				CLTLog.info("Found method: " + method.name + " " + method.desc);
-				CLTLog.info("begining at start of method " + getMethodName());
+				CLTLog.info("begining at start of method " + getName().all());
 
 				//viewerYaw = RenderUtil.setViewerYaw(x, z)
 				InsnList toInsert = new InsnList();
 				toInsert.add(new VarInsnNode(FLOAD, 2)); //x
-				toInsert.add(new VarInsnNode(FLOAD, 4));
+				toInsert.add(new VarInsnNode(FLOAD, 4)); //z
 				toInsert.add(new MethodInsnNode(INVOKESTATIC, Type.getInternalName(RenderUtil.class), "setViewerYaw", "(FF)F", false));
 				toInsert.add(new VarInsnNode(FSTORE, 6)); //viewerYaw
 
@@ -441,7 +459,7 @@ public class EntityRendererTransformer extends ClassTransformer {
 			}
 		};
 
-		return new MethodTransformer[] {transformGetFOVModifier, transformOrientCamera, transformSetupCameraTransform, transformUpdateCameraAndRender, transformRenderWorld, transformRenderWorldPass, updateFogColorTransformer, drawNameplateTransformer};
+		return new MethodTransformer[] {transformGetFOVModifier, transformOrientCamera, transformSetupCameraTransform, transformUpdateCameraAndRender, transformRenderWorld, transformRenderWorldPass, transformUpdateFogColor, transformDrawNameplate};
 	}
 
 }
