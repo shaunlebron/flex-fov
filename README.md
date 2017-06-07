@@ -52,7 +52,7 @@ version-controlled. I loosely followed [these instructions][intellij]:
 1. Run `./gradlew genIntellijRuns`
 1. Restart IntelliJ
 1. Run > Edit Configurations
-1. Put `-Dfml.coreMods.load=mod.render360.coretransform.CoreLoader` in Program Arguments
+1. Put `-Dfml.coreMods.load=mod.render360.coretransform.CoreLoader` in VM options
 1. Application > Minecraft Client > Use classpath of module > `*_main`
 1. Run > Run 'Minecraft Client'
 
