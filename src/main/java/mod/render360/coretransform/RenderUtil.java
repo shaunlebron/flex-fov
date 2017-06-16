@@ -27,10 +27,12 @@ public class RenderUtil {
 	/**Enables or disables 360 degree rendering.*/
 	public static boolean render360 = true;
 
+	public static float fov;
+
 	/**The current render method.*/
 	public static RenderMethod renderMethod = new Standard();
 	/**The index of the current render method.*/
-	public static int index = 0;
+	public static int index = 0; //TODO remove
 
 	/**Used to check if the screen was resized.*/
 	private static int width = 0;

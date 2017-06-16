@@ -38,7 +38,6 @@ public abstract class RenderMethod {
 
 	protected static float quality = 1;
 	protected static boolean resizeGui = false;
-	protected static boolean rubix = false;
 	protected static boolean split = false;
 	protected static int globeIndex = 0;
 
@@ -279,7 +278,7 @@ public abstract class RenderMethod {
 		int pitchUniform = GL20.glGetUniformLocation(shader.getShaderProgram(), "pitch");
 		GL20.glUniform1f(pitchUniform, pitch);
 		int rubixUniform = GL20.glGetUniformLocation(shader.getShaderProgram(), "rubix");
-		GL20.glUniform1i(rubixUniform, rubix ? 1 : 0);
+		GL20.glUniform1i(rubixUniform, getRubix() ? 1 : 0);
 		int splitUniform = GL20.glGetUniformLocation(shader.getShaderProgram(), "split");
 		GL20.glUniform1i(splitUniform, split ? 1 : 0);
 
@@ -321,30 +320,30 @@ public abstract class RenderMethod {
 	}
 
 	public void addButtonsToGui(List<GuiButton> buttonList, int width, int height) {
-		buttonList.add(new GuiButton(18101, width / 2 - 155, height / 6 + 48, 150, 20, "Resize Gui: " + (resizeGui ? "ON" : "OFF")));
-		buttonList.add(new Slider(new Responder(), 18102, width / 2 + 5, height / 6 + 48, 150, 20, "Quality", 0.1f, 5f, quality, 0.1f, null));
-		buttonList.add(new GuiButton(18103, width / 2 - 155, height / 6 + 78, 150, 20, "Rubix: " + (rubix ? "ON" : "OFF")));
-		buttonList.add(new GuiButton(18105, width / 2 - 155, height / 6 + 108, 150, 20, "Split Compare: " + (split ? "ON" : "OFF")));
-		Globe globe = globes[globeIndex];
-		buttonList.add(new GuiButton(18106, width / 2 + 5, height / 6 + 78, 150, 20, "Globe: " + globe.getName()));
+		//buttonList.add(new GuiButton(18101, width / 2 - 155, height / 6 + 48, 150, 20, "Resize Gui: " + (resizeGui ? "ON" : "OFF")));
+		//buttonList.add(new Slider(new Responder(), 18102, width / 2 + 5, height / 6 + 48 - 6, 150, 20, "Quality", 0.1f, 5f, quality, 0.1f, null));
+		//buttonList.add(new GuiButton(18103, width / 2 - 155, height / 6 + 48 - 6, 150, 20, "Rubix: " + (rubix ? "ON" : "OFF")));
+		//buttonList.add(new GuiButton(18105, width / 2 - 155, height / 6 + 108, 150, 20, "Split Compare: " + (split ? "ON" : "OFF")));
+		//Globe globe = globes[globeIndex];
+		//buttonList.add(new GuiButton(18106, width / 2 + 5, height / 6 + 78, 150, 20, "Globe: " + globe.getName()));
 	}
 
 	public void onButtonPress(GuiButton button) {
 		//Resize Gui
-		if (button.id == 18101) {
-			resizeGui = !resizeGui;
-			button.displayString = "Resize Gui: " + (resizeGui ? "ON" : "OFF");
-		} else if (button.id == 18103) {
-			rubix = !rubix;
-			button.displayString = "Rubix: " + (rubix ? "ON" : "OFF");
-		} else if (button.id == 18105) {
-			split = !split;
-			button.displayString = "Split Compare: " + (split ? "ON" : "OFF");
-		} else if (button.id == 18106) {
-			globeIndex = (globeIndex + 1) % globes.length;
-			Globe globe = globes[globeIndex];
-			button.displayString = "Globe: " + globe.getName();
-		}
+		//if (button.id == 18101) {
+			//resizeGui = !resizeGui;
+			//button.displayString = "Resize Gui: " + (resizeGui ? "ON" : "OFF");
+		//if (button.id == 18103) {
+			//rubix = !rubix;
+			//button.displayString = "Rubix: " + (rubix ? "ON" : "OFF");
+		//} else if (button.id == 18105) {
+			//split = !split;
+			//button.displayString = "Split Compare: " + (split ? "ON" : "OFF");
+		//} else if (button.id == 18106) {
+			//globeIndex = (globeIndex + 1) % globes.length;
+			//Globe globe = globes[globeIndex];
+			//button.displayString = "Globe: " + globe.getName();
+		//}
 	}
 
 	public float getYaw() {
@@ -375,34 +374,13 @@ public abstract class RenderMethod {
 		return resizeGui;
 	}
 
+	public boolean getRubix() { return false; }
+
 	public boolean replaceLoadingScreen() {
 		return false;
 	}
 
 	public float[] getBackgroundColor() {
 		return null;
-	}
-
-	public class Responder implements GuiResponder {
-		@Override
-		public void setEntryValue(int id, boolean value) {
-
-		}
-
-		@Override
-		public void setEntryValue(int id, float value) {
-			//Quality
-			if (id == 18102) {
-				if (quality != value) {
-					quality = value;
-					RenderUtil.forceReload();
-				}
-			}
-		}
-
-		@Override
-		public void setEntryValue(int id, String value) {
-
-		}
 	}
 }
