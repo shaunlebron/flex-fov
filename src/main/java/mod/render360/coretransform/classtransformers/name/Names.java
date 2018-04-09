@@ -50,6 +50,6 @@ public class Names {
     public static final ClassName ParticleExplosionLarge = new ClassName("net.minecraft.client.particle.ParticleExplosionLarge", "bol");
     public static final ClassName ParticleSweepAttack = new ClassName("net.minecraft.client.particle.ParticleSweepAttack", "bnw");
     public static final ClassName Particle = new ClassName("net.minecraft.client.particle.Particle", "bos");
-    public static final MethodName Particle_renderParticle = new MethodName("renderParticle", "func_180434_a", "a", "(Lnet/minecraft/client/renderer/VertexBuffer;Lnet/minecraft/entity/Entity;FFFFFF)V", "(Lbpw;Lsm;FFFFFF)V");
+    public static final MethodName Particle_renderParticle = new MethodName("renderParticle", "func_180434_a", "a", "(Lnet/minecraft/client/renderer/BufferBuilder;Lnet/minecraft/entity/Entity;FFFFFF)V", "(Lbpw;Lsm;FFFFFF)V");
 
 }

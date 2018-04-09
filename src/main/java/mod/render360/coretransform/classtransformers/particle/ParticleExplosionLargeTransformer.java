@@ -16,7 +16,6 @@ import mod.render360.coretransform.CLTLog;
 import mod.render360.coretransform.CoreLoader;
 import mod.render360.coretransform.classtransformers.ClassTransformer;
 import mod.render360.coretransform.classtransformers.ClassTransformer.MethodTransformer;
-import net.minecraft.client.renderer.VertexBuffer;
 import net.minecraft.entity.Entity;
 
 import static org.objectweb.asm.Opcodes.*;

@@ -246,7 +246,7 @@ public class RenderUtil {
 	public static void renderGuiStart2() {
 		if (renderMethod.getResizeGui()) {
 			Minecraft mc = Minecraft.getMinecraft();
-			if (mc.theWorld != null) {
+			if (mc.world != null) {
 				framebuffer.bindFramebuffer(false);
 				GlStateManager.viewport(0, 0, (int) (mc.displayHeight*renderMethod.getQuality()), (int) (mc.displayHeight*renderMethod.getQuality()));
 			}
@@ -260,7 +260,7 @@ public class RenderUtil {
 	public static void renderGuiEnd2() {
 		if (renderMethod.getResizeGui()) {
 			Minecraft mc = Minecraft.getMinecraft();
-			if (mc.theWorld != null) {
+			if (mc.world != null) {
 				mc.getFramebuffer().bindFramebuffer(false);
 				GlStateManager.viewport(0, 0, mc.displayWidth, mc.displayHeight);
 				renderMethod.runShader(mc, shader, framebufferTextures);

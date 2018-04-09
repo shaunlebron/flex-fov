@@ -81,7 +81,7 @@ public class Slider extends GuiButton
         {
             if (this.isMouseDown)
             {
-                this.sliderPosition = (float)(mouseX - (this.xPosition + 4)) / (float)(this.width - 8);
+                this.sliderPosition = (float)(mouseX - (this.x + 4)) / (float)(this.width - 8);
                 //set precision
                 this.sliderPosition = (float) (Math.round(this.sliderPosition*((max-min)/stepSize))/((max-min)/stepSize));
 
@@ -100,8 +100,8 @@ public class Slider extends GuiButton
             }
 
             GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
-            this.drawTexturedModalRect(this.xPosition + (int)(this.sliderPosition * (float)(this.width - 8)), this.yPosition, 0, 66, 4, 20);
-            this.drawTexturedModalRect(this.xPosition + (int)(this.sliderPosition * (float)(this.width - 8)) + 4, this.yPosition, 196, 66, 4, 20);
+            this.drawTexturedModalRect(this.x + (int)(this.sliderPosition * (float)(this.width - 8)), this.y, 0, 66, 4, 20);
+            this.drawTexturedModalRect(this.x + (int)(this.sliderPosition * (float)(this.width - 8)) + 4, this.y, 196, 66, 4, 20);
         }
     }
 
@@ -122,7 +122,7 @@ public class Slider extends GuiButton
     {
         if (super.mousePressed(mc, mouseX, mouseY))
         {
-            this.sliderPosition = (float)(mouseX - (this.xPosition + 4)) / (float)(this.width - 8);
+            this.sliderPosition = (float)(mouseX - (this.x + 4)) / (float)(this.width - 8);
 
             if (this.sliderPosition < 0.0F)
             {

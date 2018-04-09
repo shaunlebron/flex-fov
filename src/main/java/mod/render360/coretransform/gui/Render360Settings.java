@@ -80,7 +80,7 @@ public class Render360Settings extends GuiScreen {
 	@Override
 	public void drawScreen(int mouseX, int mouseY, float partialTicks) {
 		super.drawDefaultBackground();
-		this.drawCenteredString(super.fontRendererObj, this.screenTitle, this.width / 2, 15, 0xFFFFFF);
+		this.drawCenteredString(super.fontRenderer, this.screenTitle, this.width / 2, 15, 0xFFFFFF);
 		super.drawScreen(mouseX, mouseY, partialTicks);
 	}
 }
