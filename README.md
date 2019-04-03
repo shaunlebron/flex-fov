@@ -1,5 +1,9 @@
 # Flex FOV
 
+![flex-full](https://user-images.githubusercontent.com/116838/55492107-4472bb00-55fc-11e9-99d7-22a84666a0e4.jpg)
+![flex-menu](https://user-images.githubusercontent.com/116838/55492108-4472bb00-55fc-11e9-893e-3eb59b6588bf.jpg)
+![flex-rubix](https://user-images.githubusercontent.com/116838/55492109-4472bb00-55fc-11e9-9085-2eff2873d8b7.jpg)
+
 An experiment to display any FOV (0-360°) in a modern game.
 
 Continuing where [blinky] left off.  Rather than exposing a myriad of options,
@@ -20,6 +24,14 @@ curved>   |     standard      | stereographic |   winkel tripel   |   for panora
 We are using [this minecraft mod] as the base for this experiment.
 
 [this minecraft mod]:https://github.com/18107/MC-Render360
+
+## Videos
+
+- [🎥 reducing render time](https://youtu.be/ImXwLXYBImA)
+- [🎥 proper camera transforms](https://youtu.be/w6lI39ni7QI)
+- [🎥 split comparing panini hybrid](https://youtu.be/ILjnDVxhSFg)
+- [🎥 panini hybrid](https://youtu.be/OEmSYSDzdnE)
+- [🎥 first demo](https://youtu.be/ZNSW6Ga7Wmo)
 
 ## Quick Start
 
