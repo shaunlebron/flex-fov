@@ -20,7 +20,6 @@ import mod.render360.coretransform.classtransformers.ClassTransformer;
 import mod.render360.coretransform.classtransformers.ClassTransformer.MethodTransformer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.EntityPlayerSP;
-import net.minecraft.client.renderer.VertexBuffer;
 import net.minecraft.entity.Entity;
 
 import static org.objectweb.asm.Opcodes.*;
@@ -108,8 +107,8 @@ public class ParticleTransformer extends ClassTransformer {
 	public static float rotXY;
 	public static float rotXZ;
 	public static void rotateParticle(float rotationX, float rotationZ, float rotationYZ, float rotationXY, float rotationXZ, float posX, float posY, float posZ) {
-		posY -= Minecraft.getMinecraft().thePlayer.eyeHeight;
-		
+		posY -= Minecraft.getMinecraft().player.eyeHeight;
+
 		float hDist = (float) (Math.sqrt(posZ*posZ + posX*posX));
 		float dist = (float) (Math.sqrt(posZ*posZ + posY*posY + posX*posX));
 		

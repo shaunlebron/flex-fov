@@ -142,15 +142,15 @@
    FRAME SAME
     ALOAD 0
     GETFIELD net/minecraft/client/renderer/EntityRenderer.mc : Lnet/minecraft/client/Minecraft;
-    GETFIELD net/minecraft/client/Minecraft.thePlayer : Lnet/minecraft/client/entity/EntityPlayerSP;
+    GETFIELD net/minecraft/client/Minecraft.player : Lnet/minecraft/client/entity/EntityPlayerSP;
     GETFIELD net/minecraft/client/entity/EntityPlayerSP.prevTimeInPortal : F
     ALOAD 0
     GETFIELD net/minecraft/client/renderer/EntityRenderer.mc : Lnet/minecraft/client/Minecraft;
-    GETFIELD net/minecraft/client/Minecraft.thePlayer : Lnet/minecraft/client/entity/EntityPlayerSP;
+    GETFIELD net/minecraft/client/Minecraft.player : Lnet/minecraft/client/entity/EntityPlayerSP;
     GETFIELD net/minecraft/client/entity/EntityPlayerSP.timeInPortal : F
     ALOAD 0
     GETFIELD net/minecraft/client/renderer/EntityRenderer.mc : Lnet/minecraft/client/Minecraft;
-    GETFIELD net/minecraft/client/Minecraft.thePlayer : Lnet/minecraft/client/entity/EntityPlayerSP;
+    GETFIELD net/minecraft/client/Minecraft.player : Lnet/minecraft/client/entity/EntityPlayerSP;
     GETFIELD net/minecraft/client/entity/EntityPlayerSP.prevTimeInPortal : F
     FSUB
     FLOAD 1
@@ -171,7 +171,7 @@
     LINENUMBER 752 L21
     ALOAD 0
     GETFIELD net/minecraft/client/renderer/EntityRenderer.mc : Lnet/minecraft/client/Minecraft;
-    GETFIELD net/minecraft/client/Minecraft.thePlayer : Lnet/minecraft/client/entity/EntityPlayerSP;
+    GETFIELD net/minecraft/client/Minecraft.player : Lnet/minecraft/client/entity/EntityPlayerSP;
     GETSTATIC net/minecraft/init/MobEffects.NAUSEA : Lnet/minecraft/potion/Potion;
     INVOKEVIRTUAL net/minecraft/client/entity/EntityPlayerSP.isPotionActive (Lnet/minecraft/potion/Potion;)Z
     IFEQ L22
